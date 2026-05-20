@@ -1,15 +1,36 @@
+# IDE and OS files
 .idea/
-app/unpackage
-Crmeb-2022-01-04.log
-crmeb_front_log
-crmeb/LOG_HOME_IS_UNDEFINED
-*.
-*.
+.vscode/
 .DS_Store
-<<<<<<< HEAD
-=======
+Thumbs.db
 
-# Large files
+# Logs
+*.log
+logs/
+crmeb/logs/
+crmeb/*_log/
+crmeb/**/*_log/
+crmeb/LOG_HOME_IS_UNDEFINED/
+
+# Java and Maven build output
+target/
+*.class
+*.jar
+*.war
+*.ear
+
+# Frontend dependencies and build output
+node_modules/
+dist/
+admin/node_modules/
+admin/dist/
+app/unpackage/
+
+# Local environment files
+.env.local
+.env.*.local
+
+# Large local archives and database dumps
 *.zip
 *.sql
 *.dump
@@ -17,6 +38,5 @@ crmeb/LOG_HOME_IS_UNDEFINED
 *.rar
 *.7z
 
-# Working directories
+# Tool working directories
 .claude/
->>>>>>> 6332e5584c59ad3c1c3eab43b79261a53c5a20e6
