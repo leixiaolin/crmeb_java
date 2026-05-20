@@ -11,7 +11,7 @@
       <template v-if="fullWidth > 768">
         <swiper :options="swiperOption" class="swiperPross">
           <swiper-slide v-for="(item, index) in swiperList" :key="index" class="swiperPic">
-            <img :src="item.pic" />
+            <img :src="item.pic" @error="onLoginBannerError">
           </swiper-slide>
           <div slot="pagination" class="swiper-pagination" />
         </swiper>
@@ -19,7 +19,7 @@
       <div class="index_from page-account-container">
         <div class="page-account-top">
           <div class="page-account-top-logo">
-            <img :src="loginLogo" alt="logo" />
+            <img :src="loginLogo" alt="logo" @error="onLoginLogoError">
           </div>
         </div>
         <el-form
@@ -67,69 +67,59 @@
               :loading="loading"
               type="primary"
               style="width: 100%; margin-bottom: 30px"
-              @click.native.prevent="handleLogin"
               :disabled="disabled"
+              @click.native.prevent="handleLogin"
               >登录
             </el-button>
           </div>
         </el-form>
-        <verifition-verify ref="verifyRef" @success="handlerOnVerSuccess"></verifition-verify>
+        <verifition-verify ref="verifyRef" @success="handlerOnVerSuccess" />
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import Cookies from 'js-cookie';
-import { validUsername } from '@/utils/validate';
-import '@/assets/js/canvas-nest.min.js';
-import { getLoginPicApi } from '@/api/user';
-import { getStoreStaff } from '@/libs/public';
-import VerifitionVerify from './verifition/Verify.vue';
-import { accountDetectionApi } from '@/api/authInformation';
-import { frontDomainApi, mediaDomainApi, getSiteLogoApi } from '@/api/systemConfig';
+import Cookies from 'js-cookie'
+import '@/assets/js/canvas-nest.min.js'
+import { getLoginPicApi } from '@/api/user'
+import { getStoreStaff } from '@/libs/public'
+import VerifitionVerify from './verifition/Verify.vue'
+import { accountDetectionApi } from '@/api/authInformation'
+import { frontDomainApi, mediaDomainApi, getSiteLogoApi } from '@/api/systemConfig'
 export default {
   name: 'Login',
+  components: {
+    VerifitionVerify
+  },
   data() {
-    const validateUsername = (rule, value, callback) => {
-      if (!validUsername(value)) {
-        callback(new Error('Please enter the correct user name'));
-      } else {
-        callback();
-      }
-    };
-    const validatePassword = (rule, value, callback) => {
-      if (value.length < 6 || value.length > 12) {
-        callback(new Error('密码位数为6-12位'));
-      } else {
-        callback();
-      }
-    };
     return {
       captchatOn: true, // 是否开启行为验证码
       swiperList: [],
-      loginLogo: '',
+      loginLogo: require('@/assets/imgs/index_logo.png'),
       backgroundImages: '',
       backgroundImageMo: require('@/assets/imgs/bg.jpg'),
       fullWidth: document.body.clientWidth,
       swiperOption: {
         pagination: {
-          el: '.pagination',
+          el: '.pagination'
         },
         autoplay: {
           enabled: true,
           disableOnInteraction: false,
-          delay: 3000,
-        },
+          delay: 3000
+        }
       },
       loginForm: {
         account: '',
         pwd: '',
-        captchaVO: {},
+        captchaVO: {}
       },
+      defaultLoginLogo: require('@/assets/imgs/index_logo.png'),
+      defaultLoginBanner: require('@/assets/imgs/bg.jpg'),
       loginRules: {
         account: [{ required: true, trigger: 'blur', message: '请输入用户名' }], // validator: validateUsername
-        pwd: [{ required: true, trigger: 'blur', message: '请输入密码' }],
+        pwd: [{ required: true, trigger: 'blur', message: '请输入密码' }]
       },
       passwordType: 'password',
       capsTooltip: false,
@@ -138,190 +128,204 @@ export default {
       redirect: undefined,
       otherQuery: {},
       disabled: false,
-      //账号密码输入错误次数
-      errorsNumber: 0,
-    };
-  },
-  components: {
-    VerifitionVerify,
+      // 账号密码输入错误次数
+      errorsNumber: 0
+    }
   },
   watch: {
     fullWidth(val) {
       // 为了避免频繁触发resize函数导致页面卡顿，使用定时器
       if (!this.timer) {
         // 一旦监听到的screenWidth值改变，就将其重新赋给data里的screenWidth
-        this.screenWidth = val;
-        this.timer = true;
-        const that = this;
-        setTimeout(function () {
+        this.screenWidth = val
+        this.timer = true
+        const that = this
+        setTimeout(function() {
           // 打印screenWidth变化的值
-          that.timer = false;
-        }, 400);
+          that.timer = false
+        }, 400)
       }
     },
     $route: {
-      handler: function (route) {
-        const query = route.query;
+      handler: function(route) {
+        const query = route.query
         if (query) {
-          this.redirect = query.redirect;
-          this.otherQuery = this.getOtherQuery(query);
+          this.redirect = query.redirect
+          this.otherQuery = this.getOtherQuery(query)
         }
       },
-      immediate: true,
-    },
+      immediate: true
+    }
   },
   created() {
-    const _this = this;
-    document.onkeydown = function (e) {
+    const _this = this
+    document.onkeydown = function(e) {
       if (_this.$route.path.indexOf('login') !== -1) {
-        const key = window.event.keyCode;
+        const key = window.event.keyCode
         if (key === 13) {
-          _this.handleLogin();
+          _this.handleLogin()
         }
       }
-    };
-    window.addEventListener('resize', this.handleResize);
+    }
+    window.addEventListener('resize', this.handleResize)
   },
   mounted() {
-    this.getInfo();
-    this.onBlurAccount();
+    this.getInfo()
+    this.onBlurAccount()
     this.$nextTick(() => {
       if (this.screenWidth < 768) {
-        document.getElementsByTagName('canvas')[0].removeAttribute('class', 'index_bg');
+        document.getElementsByTagName('canvas')[0].removeAttribute('class', 'index_bg')
       } else {
-        document.getElementsByTagName('canvas')[0].className = 'index_bg';
+        document.getElementsByTagName('canvas')[0].className = 'index_bg'
       }
-    });
+    })
     if (this.loginForm.account === '') {
-      this.$refs.account.focus();
+      this.$refs.account.focus()
     } else if (this.loginForm.pwd === '') {
-      this.$refs.pwd.focus();
+      this.$refs.pwd.focus()
     }
   },
   beforeCreate() {
     if (this.fullWidth < 768) {
-      document.getElementsByTagName('canvas')[0].removeAttribute('class', 'index_bg');
+      document.getElementsByTagName('canvas')[0].removeAttribute('class', 'index_bg')
     } else {
-      document.getElementsByTagName('canvas')[0].className = 'index_bg';
+      document.getElementsByTagName('canvas')[0].className = 'index_bg'
     }
   },
   destroyed() {
     // window.removeEventListener('storage', this.afterQRScan)
   },
-  beforeDestroy: function () {
-    window.removeEventListener('resize', this.handleResize);
-    document.getElementsByTagName('canvas')[0].removeAttribute('class', 'index_bg');
+  beforeDestroy: function() {
+    window.removeEventListener('resize', this.handleResize)
+    document.getElementsByTagName('canvas')[0].removeAttribute('class', 'index_bg')
   },
   methods: {
-    //校验成功之后
+    // 校验成功之后
     handlerOnVerSuccess(repData) {
-      this.loginForm.captchaVO = repData;
-      this.success(null, true);
+      this.loginForm.captchaVO = repData
+      this.success(null, true)
     },
-    //账号失去焦点
+    // 账号失去焦点
     async onBlurAccount() {
-      if(this.loginForm.account){
-        this.errorsNumber = await accountDetectionApi({ account: this.loginForm.account });
+      if (this.loginForm.account) {
+        this.errorsNumber = await accountDetectionApi({ account: this.loginForm.account })
       }
     },
     // 获取移动端域名-图片域名
     async getUrl() {
-      let res = await getSiteLogoApi();
-      Cookies.set('logoInfo', JSON.stringify(res));
+      const res = await getSiteLogoApi()
+      Cookies.set('logoInfo', JSON.stringify(res))
       frontDomainApi().then((res) => {
-        this.$store.commit('settings/SET_FrontDomain', res);
-      });
+        this.$store.commit('settings/SET_FrontDomain', res)
+      })
       mediaDomainApi().then((res) => {
-        this.$store.commit('settings/SET_mediaDomain', res);
-      });
+        this.$store.commit('settings/SET_mediaDomain', res)
+      })
     },
     handleResize(event) {
-      this.fullWidth = document.body.clientWidth;
+      this.fullWidth = document.body.clientWidth
       if (this.fullWidth < 768) {
-        document.getElementsByTagName('canvas')[0].removeAttribute('class', 'index_bg');
+        document.getElementsByTagName('canvas')[0].removeAttribute('class', 'index_bg')
       } else {
-        document.getElementsByTagName('canvas')[0].className = 'index_bg';
+        document.getElementsByTagName('canvas')[0].className = 'index_bg'
       }
     },
     getInfo() {
-      getLoginPicApi().then((res) => {
-        this.swiperList = res.banner;
-        this.loginLogo = res.loginLogo;
-        this.backgroundImages = res.backgroundImage;
-        localStorage.setItem('singleAdminSiteName', res.siteName);
-      });
+      getLoginPicApi()
+        .then((res) => {
+          const banner = Array.isArray(res.banner) ? res.banner : []
+          this.swiperList = banner.length
+            ? banner.map((item) => Object.assign({}, item, { pic: item.pic || this.defaultLoginBanner }))
+            : [{ pic: this.defaultLoginBanner }]
+          this.loginLogo = res.loginLogo || this.defaultLoginLogo
+          this.backgroundImages = res.backgroundImage || ''
+          localStorage.setItem('singleAdminSiteName', res.siteName || '')
+        })
+        .catch(() => {
+          this.swiperList = [{ pic: this.defaultLoginBanner }]
+          this.loginLogo = this.defaultLoginLogo
+          this.backgroundImages = ''
+        })
+    },
+    onLoginLogoError(event) {
+      event.target.onerror = null
+      event.target.src = this.defaultLoginLogo
+    },
+    onLoginBannerError(event) {
+      event.target.onerror = null
+      event.target.src = this.defaultLoginBanner
     },
     checkCapslock(e) {
-      const { key } = e;
-      this.capsTooltip = key && key.length === 1 && key >= 'A' && key <= 'Z';
+      const { key } = e
+      this.capsTooltip = key && key.length === 1 && key >= 'A' && key <= 'Z'
     },
     showPwd() {
       if (this.passwordType === 'password') {
-        this.passwordType = '';
+        this.passwordType = ''
       } else {
-        this.passwordType = 'password';
+        this.passwordType = 'password'
       }
       this.$nextTick(() => {
-        this.$refs.pwd.focus();
-      });
+        this.$refs.pwd.focus()
+      })
     },
     handleLogin() {
       this.$refs.loginForm.validate((valid) => {
         if (valid) {
           if (Number(this.errorsNumber) > 3) {
-            this.$refs.verifyRef.show();
+            this.$refs.verifyRef.show()
           } else {
-            this.success(null);
+            this.success(null)
           }
         } else {
-          return false;
+          return false
         }
-      });
+      })
     },
     success(params, type) {
       // this.loginForm.captcha = this.$store.state.user.captcha;
       // this.loginForm.captcha.captchaVerification = params ? params.captchaVerification : '';
       const loading = this.$loading({
         lock: true,
-        text: '正在登录中.',
-      });
+        text: '正在登录中.'
+      })
       this.$store
         .dispatch('user/login', this.loginForm)
         .then(() => {
           this.$router.push({
             path: this.redirect || '/',
-            query: this.otherQuery,
-          });
-          getStoreStaff();
-          loading.close();
-          this.disabled = true;
-          this.getUrl();
+            query: this.otherQuery
+          })
+          getStoreStaff()
+          loading.close()
+          this.disabled = true
+          this.getUrl()
           this.$store
             .dispatch('user/getMenus', {
-              that: this,
+              that: this
             })
             .then((res) => {
-              this.$router.push({ path: this.redirect || '/dashboard', query: this.otherQuery });
-              //location.reload();
-            });
+              this.$router.push({ path: this.redirect || '/dashboard', query: this.otherQuery })
+              // location.reload();
+            })
         })
-        .catch(async (err) => {
-          await this.onBlurAccount();
-          if (Number(this.errorsNumber) > 3 && !type) await this.$refs.verifyRef.show();
-          loading.close();
-          this.disabled = false;
-        });
+        .catch(async() => {
+          await this.onBlurAccount()
+          if (Number(this.errorsNumber) > 3 && !type) await this.$refs.verifyRef.show()
+          loading.close()
+          this.disabled = false
+        })
     },
     getOtherQuery(query) {
       return Object.keys(query).reduce((acc, cur) => {
         if (cur !== 'redirect') {
-          acc[cur] = query[cur];
+          acc[cur] = query[cur]
         }
-        return acc;
-      }, {});
-    },
-  },
-};
+        return acc
+      }, {})
+    }
+  }
+}
 </script>
 
 <style lang="scss" scoped>
