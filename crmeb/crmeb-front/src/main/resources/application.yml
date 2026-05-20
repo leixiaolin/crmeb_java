@@ -48,9 +48,9 @@ spring:
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://127.0.0.1:3306/single_open?characterEncoding=utf-8&useSSL=false&serverTimeZone=GMT+8
-    username: single_open
-    password: 111111
+    url: jdbc:mysql://127.0.0.1:3306/single_open?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: 123456
   redis:
     host: 127.0.0.1 #地址
     port: 6379 #端口

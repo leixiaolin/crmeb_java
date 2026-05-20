@@ -54,9 +54,9 @@ spring:
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://127.0.0.1:3306/single_open?serverTimezone=UTC
-    username: single_open
-    password: 111111
+    url: jdbc:mysql://127.0.0.1:3306/single_open?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: 123456
   # quartz
   quartz:
     properties:
@@ -86,7 +86,7 @@ spring:
   redis:
     host: 127.0.0.1 #地址
     port: 6379 #端口
-    password: 111111
+    password:
     timeout: 30000 # 连接超时时间（毫秒）
     database: 6  #默认数据库
     jedis:
