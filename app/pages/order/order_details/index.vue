@@ -95,11 +95,15 @@
 					<view class='name'>{{orderInfo.realName}}<text class='phone'>{{orderInfo.userPhone}}</text></view>
 					<view>{{orderInfo.userAddress}}</view>
 				</view>
-				<view v-else class='address' style="margin-top:15rpx;">
+				<view v-else-if="orderInfo.shippingType === 2" class='address' style="margin-top:15rpx;">
 					<view class='name' @tap="makePhone">{{orderInfo.systemStore?orderInfo.systemStore.name:''}}<text
 							class='phone'>{{orderInfo.systemStore?orderInfo.systemStore.phone:''}}</text><text
 							class="iconfont icon-tonghua font-color"></text></view>
 					<view>{{orderInfo.systemStore?orderInfo.systemStore.address + orderInfo.systemStore.detailedAddress:''}}</view>
+				</view>
+				<view v-else class='address borRadius14'>
+					<view class='name'>{{orderInfo.realName}}<text class='phone'>{{orderInfo.userPhone}}</text></view>
+					<view>{{orderInfo.userAddress}}</view>
 				</view>
 
 				<orderGoods :evaluate='evaluate' :productType="orderInfo.type" :orderId="order_id" :ids="id" :uniId="uniId" :cartInfo="cartInfo"

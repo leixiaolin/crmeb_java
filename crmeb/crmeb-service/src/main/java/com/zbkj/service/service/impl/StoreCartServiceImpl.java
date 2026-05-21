@@ -183,6 +183,7 @@ public class StoreCartServiceImpl extends ServiceImpl<StoreCartDao, StoreCart> i
         // 普通商品部分(只有普通商品才能添加购物车)
         // 是否已经有同类型商品在购物车，有则添加数量没有则新增
         User currentUser = userService.getInfo();
+        validateSameMerchantCart(currentUser.getUid(), product);
         StoreCart storeCartPram = new StoreCart();
         storeCartPram.setProductAttrUnique(storeCartRequest.getProductAttrUnique());
         storeCartPram.setUid(currentUser.getUid());
@@ -233,6 +234,26 @@ public class StoreCartServiceImpl extends ServiceImpl<StoreCartDao, StoreCart> i
         LambdaQueryWrapper<StoreCart> lqw = new LambdaQueryWrapper<>();
         lqw.setEntity(storeCart);
         return dao.selectList(lqw);
+    }
+
+    private void validateSameMerchantCart(Integer userId, StoreProduct product) {
+        LambdaQueryWrapper<StoreCart> lqw = Wrappers.lambdaQuery();
+        lqw.eq(StoreCart::getUid, userId);
+        lqw.eq(StoreCart::getStatus, true);
+        lqw.eq(StoreCart::getIsNew, false);
+        List<StoreCart> carts = dao.selectList(lqw);
+        if (CollUtil.isEmpty(carts)) {
+            return;
+        }
+        List<Integer> productIds = carts.stream().map(StoreCart::getProductId).distinct().collect(Collectors.toList());
+        List<StoreProduct> cartProducts = storeProductService.listByIds(productIds);
+        Integer productMerId = ObjectUtil.defaultIfNull(product.getMerId(), 0);
+        for (StoreProduct cartProduct : cartProducts) {
+            Integer cartMerId = ObjectUtil.defaultIfNull(cartProduct.getMerId(), 0);
+            if (!cartMerId.equals(productMerId) && (cartMerId > 0 || productMerId > 0)) {
+                throw new CrmebException("Campus cart only supports products from one store");
+            }
+        }
     }
 
     /**
@@ -409,4 +430,3 @@ public class StoreCartServiceImpl extends ServiceImpl<StoreCartDao, StoreCart> i
         return updateBatchById(existStoreCartProducts);
     }
 }
-

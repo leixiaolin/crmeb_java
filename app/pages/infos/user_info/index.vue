@@ -83,6 +83,12 @@
 							立即设置<text class="iconfont icon-xiangyou"></text>
 						</view>
 					</view>
+					<view class='item acea-row row-between-wrapper'>
+						<view>校园地址</view>
+						<view class="input" @click="toCampusAddress">
+							立即设置<text class="iconfont icon-xiangyou"></text>
+						</view>
+					</view>
 				</view>
 				<button class='modifyBnt bg_color' formType="submit">保存修改</button>
 				<!-- #ifdef H5 -->
@@ -169,6 +175,11 @@
 			toAddress(){
 				uni.navigateTo({
 					url:'/pages/users/user_address_list/index'
+				})
+			},
+			toCampusAddress(){
+				uni.navigateTo({
+					url:'/pages/users/campus_address_list/index'
 				})
 			},
 			/**

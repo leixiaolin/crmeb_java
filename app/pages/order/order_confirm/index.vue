@@ -7,12 +7,12 @@
 
 		<!-- #endif -->
 		<view class='order-submission' :style="'margin-top:'+(marTop)+'rpx;'">
-			<view class="allAddress" :style="store_self_mention ? '':'padding-top:0;'">
-				<view class="nav acea-row">
-					<view class="item font_color" :class="shippingType == 0 ? 'on' : 'on2'" @tap="addressType(0)"
-						v-if='store_self_mention'></view>
-					<view class="item font_color" :class="shippingType == 1 ? 'on' : 'on2'" @tap="addressType(1)"
-						v-if='store_self_mention'></view>
+			<view class="allAddress">
+				<view class="delivery-tabs acea-row">
+					<view class="delivery-tab" :class="shippingType == 0 ? 'on' : ''" @tap="addressType(0)">快递配送</view>
+					<view class="delivery-tab" :class="shippingType == 1 ? 'on' : ''" @tap="addressType(1)"
+						v-if='store_self_mention'>到店自提</view>
+					<view class="delivery-tab" :class="shippingType == 2 ? 'on' : ''" @tap="addressType(2)">校园配送</view>
 				</view>
 				<view class='address acea-row row-between-wrapper' @tap='onAddress' v-if='shippingType == 0'
 					:style="store_self_mention ? '':'border-top-left-radius: 14rpx;border-top-right-radius: 14rpx;'">
@@ -31,7 +31,7 @@
 					</view>
 					<view class='iconfont icon-jiantou'></view>
 				</view>
-				<view class='address acea-row row-between-wrapper' v-else @tap="showStoreList">
+				<view class='address acea-row row-between-wrapper' v-else-if="shippingType == 1" @tap="showStoreList">
 					<block v-if="storeList.length>0">
 						<view class='addressCon'>
 							<view class='name'>{{system_store.name}}
@@ -45,6 +45,21 @@
 					<block v-else>
 						<view>暂无门店信息</view>
 					</block>
+				</view>
+				<view class='address acea-row row-between-wrapper' v-else @tap="onCampusAddress">
+					<view class='addressCon' v-if="campusAddressInfo.contactName">
+						<view class='name'>{{campusAddressInfo.contactName}}
+							<text class='phone'>{{campusAddressInfo.contactPhone}}</text>
+						</view>
+						<view class="line2">
+							{{campusAddressInfo.schoolName}}{{campusAddressInfo.campusName}}{{campusAddressInfo.buildingName}}
+							{{campusAddressInfo.floorNo}}层{{campusAddressInfo.roomNo}}
+						</view>
+					</view>
+					<view class='addressCon' v-else>
+						<view class='setaddress'>设置校园地址</view>
+					</view>
+					<view class='iconfont icon-jiantou'></view>
 				</view>
 				<view class='line'>
 					<image :src="urlDomain+'crmebimage/perset/staticImg/line.jpg'"></image>
@@ -80,14 +95,14 @@
 						<view>会员优惠</view>
 						<view class='discount'>-￥{{priceGroup.vipPrice}}</view>
 					</view> -->
-					<view class='item acea-row row-between-wrapper' v-if='shippingType==0'>
+					<view class='item acea-row row-between-wrapper' v-if='shippingType!=1'>
 						<view>快递费用</view>
 						<view class='discount' v-if='parseFloat(orderInfoVo.freightFee) > 0'>
 							+￥{{orderInfoVo.freightFee}}
 						</view>
 						<view class='discount' v-else>免运费</view>
 					</view>
-					<view v-else>
+					<view v-else-if='shippingType==1'>
 						<view class="item acea-row row-between-wrapper">
 							<view>联系人</view>
 							<view class="discount textR">
@@ -163,6 +178,10 @@
 		getAddressDetail,
 		getAddressDefault
 	} from '@/api/user.js';
+	import {
+		campusAddressDefaultApi,
+		campusAddressDetailApi
+	} from '@/api/campus.js';
 	import {
 		openPaySubscribe,
 		openOrderSubscribe
@@ -246,6 +265,8 @@
 				}, //优惠券组件
 				addressInfo: {}, //地址信息
 				addressId: 0, //地址id
+				campusAddressInfo: {},
+				campusAddressId: 0,
 				couponId: 0, //优惠券id
 				cartId: '', //购物车id
 				userInfo: {}, //用户信息
@@ -290,6 +311,7 @@
 				theme: app.globalData.theme,
 				formContent: '',
 				addressChangeId: 0,
+				campusAddressChangeId: 0,
 				orderNo: '' //下单订单号
 			};
 		},
@@ -329,6 +351,8 @@
 			// });
 			this.preOrderNo = options.preOrderNo || 0;
 			this.addressChangeId = options.addressId || 0;
+			this.campusAddressChangeId = options.campusAddressId || 0;
+			if (this.campusAddressChangeId) this.shippingType = 2;
 			this.is_address = options.is_address ? true : false;
 			if (this.isLogin) {
 				this.getloadPreOrder();
@@ -373,6 +397,7 @@
 					this.cartArr[1].payStatus = parseInt(res.data.yuePayStatus) === 1 ? 1 : 2;
 					this.cartArr[0].payStatus = parseInt(res.data.payWeixinOpen) === 1 ? 1 : 0;
 					this.getaddressInfo();
+					this.getCampusAddressInfo();
 					// #ifdef H5
 					if (this.$wechat.isWeixin()) this.cartArr.pop();
 					// #endif
@@ -422,6 +447,7 @@
 				let shippingType = this.shippingType;
 				postOrderComputed({
 					addressId: this.addressId,
+					campusAddressId: this.campusAddressId,
 					useIntegral: this.useIntegral ? true : false,
 					couponId: this.couponId,
 					shippingType: parseInt(shippingType) + 1,
@@ -455,6 +481,7 @@
 					this.getList();
 					this.$util.$L.getLocation();
 				}
+				if (index == 2) this.getCampusAddressInfo();
 			},
 			bindPickerChange: function(e) {
 				let value = e.detail.value;
@@ -532,6 +559,16 @@
 					})
 				}
 			},
+			getCampusAddressInfo: function() {
+				let request = this.campusAddressChangeId ? campusAddressDetailApi(this.campusAddressChangeId) :
+					campusAddressDefaultApi();
+				request.then(res => {
+					if (!res.data) return;
+					this.campusAddressInfo = res.data;
+					this.campusAddressId = res.data.id;
+					if (this.shippingType == 2) this.computedPrice();
+				});
+			},
 			payItem: function(e) {
 				let that = this;
 				let active = e;
@@ -567,6 +604,11 @@
 
 				uni.redirectTo({
 					url: '/pages/users/user_address_list/index?preOrderNo=' + this.preOrderNo
+				});
+			},
+			onCampusAddress: function() {
+				uni.redirectTo({
+					url: '/pages/users/campus_address_list/index?preOrderNo=' + this.preOrderNo
 				});
 			},
 			realName: function(e) {
@@ -615,6 +657,9 @@
 				if (!that.addressId && !that.shippingType) return that.$util.Tips({
 					title: '请选择收货地址'
 				});
+				if (that.shippingType == 2 && !that.campusAddressId) return that.$util.Tips({
+					title: '请选择校园地址'
+				});
 				if (that.shippingType == 1) {
 					if (that.contacts == "" || that.contactsTel == "") {
 						return that.$util.Tips({
@@ -639,6 +684,7 @@
 					realName: that.contacts,
 					phone: that.contactsTel,
 					addressId: that.addressId,
+					campusAddressId: that.campusAddressId,
 					couponId: that.couponId,
 					useIntegral: that.useIntegral,
 					preOrderNo: that.preOrderNo,
@@ -733,6 +779,31 @@
 	.order-submission .allAddress .nav {
 		width: 690rpx;
 		margin: 0 auto;
+	}
+
+	.order-submission .delivery-tabs {
+		width: 690rpx;
+		margin: 0 auto;
+		padding: 10rpx;
+		border-radius: 14rpx 14rpx 0 0;
+		background: rgba(255, 255, 255, 0.4);
+		box-sizing: border-box;
+	}
+
+	.order-submission .delivery-tab {
+		flex: 1;
+		height: 66rpx;
+		line-height: 66rpx;
+		text-align: center;
+		font-size: 27rpx;
+		color: #555;
+		border-radius: 10rpx;
+	}
+
+	.order-submission .delivery-tab.on {
+		background: #fff;
+		color: #333;
+		font-weight: bold;
 	}
 
 	.order-submission .allAddress .nav .item {

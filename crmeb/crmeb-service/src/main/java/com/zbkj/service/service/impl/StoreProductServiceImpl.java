@@ -1178,7 +1178,11 @@ public class StoreProductServiceImpl extends ServiceImpl<StoreProductDao, StoreP
 
         lqw.eq(StoreProduct::getIsRecycle, false);
         lqw.eq(StoreProduct::getIsDel, false);
-        lqw.eq(StoreProduct::getMerId, false);
+        if (ObjectUtil.isNotNull(request.getMerId()) && request.getMerId() > 0) {
+            lqw.eq(StoreProduct::getMerId, request.getMerId());
+        } else {
+            lqw.eq(StoreProduct::getMerId, false);
+        }
         lqw.gt(StoreProduct::getStock, 0);
         lqw.eq(StoreProduct::getIsShow, true);
         if (ObjectUtil.isNotNull(request.getCid()) && !request.getCid().isEmpty()) {
@@ -1225,6 +1229,33 @@ public class StoreProductServiceImpl extends ServiceImpl<StoreProductDao, StoreP
             storeProduct.setSales(storeProduct.getSales() + storeProduct.getFicti());
         });
         return storeProducts;
+    }
+
+    @Override
+    public List<Category> getFrontCategoryListByMerId(Integer merId) {
+        if (ObjectUtil.isNull(merId) || merId <= 0) {
+            return CollUtil.newArrayList();
+        }
+        LambdaQueryWrapper<StoreProduct> lqw = Wrappers.lambdaQuery();
+        lqw.select(StoreProduct::getCateId);
+        lqw.eq(StoreProduct::getMerId, merId);
+        getForSaleWhere(lqw);
+        lqw.gt(StoreProduct::getStock, 0);
+        List<StoreProduct> products = dao.selectList(lqw);
+        if (CollUtil.isEmpty(products)) {
+            return CollUtil.newArrayList();
+        }
+        List<Integer> categoryIds = CollUtil.newArrayList();
+        for (StoreProduct product : products) {
+            if (StrUtil.isBlank(product.getCateId())) {
+                continue;
+            }
+            categoryIds.addAll(CrmebUtil.stringToArray(product.getCateId()));
+        }
+        if (CollUtil.isEmpty(categoryIds)) {
+            return CollUtil.newArrayList();
+        }
+        return categoryService.getByIds(categoryIds.stream().distinct().collect(Collectors.toList()));
     }
 
     /**
@@ -1521,4 +1552,3 @@ public class StoreProductServiceImpl extends ServiceImpl<StoreProductDao, StoreP
         lqw.eq(StoreProduct::getIsShow, true);
     }
 }
-

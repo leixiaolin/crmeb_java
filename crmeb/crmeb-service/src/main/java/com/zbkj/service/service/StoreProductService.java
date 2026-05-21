@@ -3,6 +3,7 @@ package com.zbkj.service.service;
 import com.alipay.api.domain.Product;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.github.pagehelper.PageInfo;
+import com.zbkj.common.model.category.Category;
 import com.zbkj.common.model.product.StoreProduct;
 import com.zbkj.common.request.*;
 import com.zbkj.common.response.StoreProductInfoResponse;
@@ -168,6 +169,14 @@ public interface StoreProductService extends IService<StoreProduct> {
      * @return List
      */
     List<StoreProduct> findH5List(ProductRequest request, PageParamRequest pageRequest);
+
+    /**
+     * Get front categories that have on-sale products in the specified store.
+     *
+     * @param merId store id
+     * @return category list
+     */
+    List<Category> getFrontCategoryListByMerId(Integer merId);
 
     /**
      * 获取移动端商品详情

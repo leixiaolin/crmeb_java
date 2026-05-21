@@ -166,6 +166,12 @@ const operationRouter = {
           name: 'freightSet',
           meta: { title: '运费模板', noCache: true },
         },
+        {
+          path: 'campus',
+          component: () => import('@/views/systemSetting/deliverGoods/campus'),
+          name: 'campusConfig',
+          meta: { title: '校园外卖配置', noCache: true },
+        },
       ],
     },
   ],

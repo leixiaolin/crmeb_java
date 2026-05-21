@@ -4,7 +4,7 @@
       <div v-if="orderDatalist" v-loading="loading">
         <div class="detailHead">
           <div class="full">
-            <div class="order_icon"><span class="iconfont icondingdanguanli"></span></div>
+            <div class="order_icon"><span class="iconfont icondingdanguanli" /></div>
             <div class="text">
               <div class="title">{{ orderDatalist.orderTypeText || '-' }}</div>
               <div>
@@ -13,7 +13,7 @@
             </div>
           </div>
           <ul class="list">
-            <li class="item" v-if="orderDatalist.statusStr">
+            <li v-if="orderDatalist.statusStr" class="item">
               <div class="title">订单状态</div>
               <div class="color-warning">
                 <span>{{ orderDatalist.statusStr.value }}</span>
@@ -33,7 +33,7 @@
             </li>
           </ul>
         </div>
-        <el-tabs type="border-card" v-model="activeName">
+        <el-tabs v-model="activeName" type="border-card">
           <el-tab-pane label="订单信息" name="detail">
             <div class="detailSection" style="border: none">
               <div class="title">用户信息</div>
@@ -48,7 +48,7 @@
                 </li>
               </ul>
             </div>
-            <div v-if="orderDatalist.shippingType < 2 && orderDatalist.secondType !== 2" class="detailSection">
+            <div v-if="orderDatalist.shippingType !== 2 && orderDatalist.secondType !== 2" class="detailSection">
               <div class="title">收货信息</div>
               <ul class="list">
                 <li class="item">
@@ -152,7 +152,7 @@
             <div v-if="orderExtend.length" class="detailSection">
               <div class="title">自定义留言</div>
               <ul class="list">
-                <li class="item" v-for="(item, index) in orderExtend" :key="index">
+                <li v-for="(item, index) in orderExtend" :key="index" class="item">
                   <div class="lang" :title="item.title">{{ item.title }}</div>
                   <div>{{ item.title.includes(':') ? '' : '：' }}</div>
                   <div v-if="!Array.isArray(item.value)" class="value">{{ item.value | filterEmpty }}</div>
@@ -162,7 +162,7 @@
                         <el-image v-if="pic.includes('http')" class="pictrue" :src="pic" :preview-src-list="[pic]" />
                         <div v-else class="text-14px fontColor333 ml-5px acea-row row-middle mr5">
                           {{ pic }}
-                          <div style="margin-left: 6px" v-show="idx < item.value.length - 1">-</div>
+                          <div v-show="idx < item.value.length - 1" style="margin-left: 6px">-</div>
                         </div>
                       </div>
                     </template>
@@ -212,7 +212,7 @@
               <div>
                 <el-table class="mt20" size="small" :data="orderDatalist.orderInfo">
                   <el-table-column min-width="400">
-                    <template slot="header" slot-scope="scope">
+                    <template slot="header">
                       <template v-if="orderDatalist.deliveryType === 'express'">
                         <span class="font-color">【快递配送】</span>
                         <span>{{ orderDatalist.deliveryName + '：' + orderDatalist.deliveryId }}</span>
@@ -244,7 +244,7 @@
                     </template>
                   </el-table-column>
                   <el-table-column width="400" fixed="right">
-                    <template slot="header" slot-scope="scope">
+                    <template slot="header">
                       <div class="flex mr10" style="justify-content: flex-end">
                         <a
                           v-if="orderDatalist.deliveryType === 'express'"
@@ -268,7 +268,7 @@
     </el-drawer>
     <el-dialog v-if="orderDatalist" title="提示" :visible.sync="modal2" width="30%">
       <div class="logistics acea-row row-top">
-        <div class="logistics_img"><img src="@/assets/imgs/expressi.jpg" /></div>
+        <div class="logistics_img"><img src="@/assets/imgs/expressi.jpg"></div>
         <div class="logistics_cent">
           <span class="mb10">物流公司：{{ orderDatalist.deliveryName }}</span>
           <span>物流单号：{{ orderDatalist.deliveryId }}</span>
@@ -278,8 +278,8 @@
         <div class="scollhide">
           <el-timeline :reverse="reverse">
             <el-timeline-item v-for="(item, i) in result" :key="i">
-              <p class="time" v-text="item.time"></p>
-              <p class="content" v-text="item.status"></p>
+              <p class="time" v-text="item.time" />
+              <p class="content" v-text="item.status" />
             </el-timeline-item>
           </el-timeline>
         </div>
@@ -303,14 +303,15 @@
 // | Author: CRMEB Team <admin@crmeb.com>
 // +----------------------------------------------------------------------
 
-import { getLogisticsInfoApi, orderInvoiceListApi, orderDetailApi, refundOrderDetailApi } from '@/api/order';
-import { checkPermi } from '@/utils/permission';
+import { getLogisticsInfoApi, orderDetailApi, refundOrderDetailApi } from '@/api/order'
+import { checkPermi } from '@/utils/permission'
 export default {
   name: 'OrderDetail',
   props: {
     orderId: {
-      default: 0,
-    },
+      type: [String, Number],
+      default: 0
+    }
   },
   data() {
     return {
@@ -327,56 +328,56 @@ export default {
       refundInfo: {},
       editDeliveryDialogVisible: false,
       editData: {},
-      orderExtend: [], //系统表单数据
-      expressName: '', //快递名称
-    };
+      orderExtend: [], // 系统表单数据
+      expressName: '' // 快递名称
+    }
   },
   methods: {
     checkPermi,
-    //修改物流信息
+    // 修改物流信息
     handleEditLogistics(row) {
-      this.editDeliveryDialogVisible = true;
-      this.editData = row;
+      this.editDeliveryDialogVisible = true
+      this.editData = row
     },
-    //关闭配送信息
+    // 关闭配送信息
     onCloseVisible() {
-      this.editDeliveryDialogVisible = false;
+      this.editDeliveryDialogVisible = false
     },
     handleClose() {
-      this.dialogVisible = false;
+      this.dialogVisible = false
     },
     // 获取订单退款信息
     getRefundOrderDetail(id) {
-      refundOrderDetailApi(id).then(async (res) => {
-        this.refundInfo = res;
-      });
+      refundOrderDetailApi(id).then(async(res) => {
+        this.refundInfo = res
+      })
     },
     openLogistics() {
-      this.getOrderData();
-      this.modal2 = true;
+      this.getOrderData()
+      this.modal2 = true
     },
     // 获取订单物流信息
     getOrderData() {
-      getLogisticsInfoApi({ orderNo: this.orderId }).then(async (res) => {
-        this.result = res.list;
-      });
+      getLogisticsInfoApi({ orderNo: this.orderId }).then(async(res) => {
+        this.result = res.list
+      })
     },
     getDetail(id) {
-      this.loading = true;
+      this.loading = true
       orderDetailApi({ orderNo: id })
         .then((res) => {
-          this.orderDatalist = res;
-          this.orderExtend = res.orderExtend ? JSON.parse(res.orderExtend) : [];
-          this.activeName = 'detail';
-          this.loading = false;
+          this.orderDatalist = res
+          this.orderExtend = res.orderExtend ? JSON.parse(res.orderExtend) : []
+          this.activeName = 'detail'
+          this.loading = false
         })
         .catch(() => {
-          this.orderDatalist = null;
-          this.loading = false;
-        });
-    },
-  },
-};
+          this.orderDatalist = null
+          this.loading = false
+        })
+    }
+  }
+}
 </script>
 
 <style scoped lang="scss">

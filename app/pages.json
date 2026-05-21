@@ -222,6 +222,58 @@
 					}
 				},
 				{
+					"path": "campus_address_list/index",
+					"style": {
+						"navigationBarTitleText": "校园地址",
+						"app-plus": {
+							// #ifdef APP-PLUS
+							"titleNView": {
+								"type": "default"
+							}
+							// #endif
+						}
+					}
+				},
+				{
+					"path": "campus_address/index",
+					"style": {
+						"navigationBarTitleText": "添加校园地址",
+						"app-plus": {
+							// #ifdef APP-PLUS
+							"titleNView": {
+								"type": "default"
+							}
+							// #endif
+						}
+					}
+				},
+				{
+					"path": "campus_store_list/index",
+					"style": {
+						"navigationBarTitleText": "校园商家",
+						"app-plus": {
+							// #ifdef APP-PLUS
+							"titleNView": {
+								"type": "default"
+							}
+							// #endif
+						}
+					}
+				},
+				{
+					"path": "campus_store_detail/index",
+					"style": {
+						"navigationBarTitleText": "商家详情",
+						"app-plus": {
+							// #ifdef APP-PLUS
+							"titleNView": {
+								"type": "default"
+							}
+							// #endif
+						}
+					}
+				},
+				{
 					"path": "user_payment/index",
 					"style": {
 						"navigationBarTitleText": "余额充值",

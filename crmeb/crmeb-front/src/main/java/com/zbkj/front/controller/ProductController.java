@@ -13,6 +13,7 @@ import com.zbkj.common.utils.CrmebUtil;
 import com.zbkj.common.vo.CategoryTreeVo;
 import com.zbkj.front.service.ProductService;
 import com.zbkj.service.service.CategoryService;
+import com.zbkj.service.service.StoreProductService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -47,6 +48,9 @@ public class ProductController {
     @Autowired
     private CategoryService categoryService;
 
+    @Autowired
+    private StoreProductService storeProductService;
+
     /**
      * 热门商品推荐
      */
@@ -72,6 +76,12 @@ public class ProductController {
     @RequestMapping(value = "/category", method = RequestMethod.GET)
     public CommonResult<List<CategoryTreeVo>> getCategory() {
         return CommonResult.success(productService.getCategory());
+    }
+
+    @ApiOperation(value = "店铺可售商品分类")
+    @RequestMapping(value = "/store/category/{merId}", method = RequestMethod.GET)
+    public CommonResult<List<Category>> getStoreCategory(@PathVariable Integer merId) {
+        return CommonResult.success(storeProductService.getFrontCategoryListByMerId(merId));
     }
 
     @ApiOperation(value = "根据pid获取子分类")
@@ -161,6 +171,4 @@ public class ProductController {
         return CommonResult.success(productService.getProductByIds(CrmebUtil.stringToArray(ids)));
     }
 }
-
-
 

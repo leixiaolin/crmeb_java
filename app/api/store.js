@@ -87,6 +87,16 @@ export function getCategoryList() {
 }
 
 /**
+ * Get on-sale product categories for one store.
+ * @param int merId
+ */
+export function getStoreCategoryList(merId) {
+	return request.get('store/category/' + merId, {}, {
+		noAuth: true
+	});
+}
+
+/**
  * 获取产品列表
  * @param object data
  */

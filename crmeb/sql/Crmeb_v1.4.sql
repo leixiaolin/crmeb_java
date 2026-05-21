@@ -8257,6 +8257,27 @@ INSERT INTO `eb_system_menu` VALUES (489, 280, '修改管理员名称', '', 'adm
 INSERT INTO `eb_system_menu` VALUES (491, 14, '编辑库存', '', 'admin:product:quick:stock:add', '', 'A', 0, 1, 0, '2025-05-23 11:16:07', '2025-05-23 11:16:07');
 INSERT INTO `eb_system_menu` VALUES (492, 226, '用户概览', '', 'admin:statistics:user:overview', '', 'A', 0, 1, 0, '2025-06-16 14:33:56', '2025-06-16 14:33:56');
 INSERT INTO `eb_system_menu` VALUES (493, 226, '用户渠道数据', '', 'admin:statistics:user:channel', '', 'A', 0, 1, 0, '2025-06-16 14:34:17', '2025-06-16 14:34:17');
+INSERT INTO `eb_system_menu` VALUES (494, 124, '校园外卖配置', '', 'admin:campus:school:list', '/operation/deliverGoods/campus', 'C', 3, 1, 0, '2026-05-21 00:00:00', '2026-05-21 00:00:00');
+INSERT INTO `eb_system_menu` VALUES (495, 494, '校园学校新增', '', 'admin:campus:school:save', '', 'A', 1, 1, 0, '2026-05-21 00:00:00', '2026-05-21 00:00:00');
+INSERT INTO `eb_system_menu` VALUES (496, 494, '校园学校修改', '', 'admin:campus:school:update', '', 'A', 2, 1, 0, '2026-05-21 00:00:00', '2026-05-21 00:00:00');
+INSERT INTO `eb_system_menu` VALUES (497, 494, '校园学校状态', '', 'admin:campus:school:update:status', '', 'A', 3, 1, 0, '2026-05-21 00:00:00', '2026-05-21 00:00:00');
+INSERT INTO `eb_system_menu` VALUES (498, 494, '校园学校删除', '', 'admin:campus:school:delete', '', 'A', 4, 1, 0, '2026-05-21 00:00:00', '2026-05-21 00:00:00');
+INSERT INTO `eb_system_menu` VALUES (499, 494, '校园楼栋列表', '', 'admin:campus:building:list', '', 'A', 5, 1, 0, '2026-05-21 00:00:00', '2026-05-21 00:00:00');
+INSERT INTO `eb_system_menu` VALUES (500, 494, '校园楼栋新增', '', 'admin:campus:building:save', '', 'A', 6, 1, 0, '2026-05-21 00:00:00', '2026-05-21 00:00:00');
+INSERT INTO `eb_system_menu` VALUES (501, 494, '校园楼栋修改', '', 'admin:campus:building:update', '', 'A', 7, 1, 0, '2026-05-21 00:00:00', '2026-05-21 00:00:00');
+INSERT INTO `eb_system_menu` VALUES (502, 494, '校园楼栋状态', '', 'admin:campus:building:update:status', '', 'A', 8, 1, 0, '2026-05-21 00:00:00', '2026-05-21 00:00:00');
+INSERT INTO `eb_system_menu` VALUES (503, 494, '校园楼栋删除', '', 'admin:campus:building:delete', '', 'A', 9, 1, 0, '2026-05-21 00:00:00', '2026-05-21 00:00:00');
+INSERT INTO `eb_system_menu` VALUES (504, 494, '校园配送规则查看', '', 'admin:campus:delivery:config', '', 'A', 10, 1, 0, '2026-05-21 00:00:00', '2026-05-21 00:00:00');
+INSERT INTO `eb_system_menu` VALUES (505, 494, '校园配送规则保存', '', 'admin:campus:delivery:config:save', '', 'A', 11, 1, 0, '2026-05-21 00:00:00', '2026-05-21 00:00:00');
+INSERT INTO `eb_system_menu` VALUES (506, 494, '校园楼层费列表', '', 'admin:campus:delivery:fee:list', '', 'A', 12, 1, 0, '2026-05-21 00:00:00', '2026-05-21 00:00:00');
+INSERT INTO `eb_system_menu` VALUES (507, 494, '校园楼层费新增', '', 'admin:campus:delivery:fee:save', '', 'A', 13, 1, 0, '2026-05-21 00:00:00', '2026-05-21 00:00:00');
+INSERT INTO `eb_system_menu` VALUES (508, 494, '校园楼层费修改', '', 'admin:campus:delivery:fee:update', '', 'A', 14, 1, 0, '2026-05-21 00:00:00', '2026-05-21 00:00:00');
+INSERT INTO `eb_system_menu` VALUES (509, 494, '校园楼层费删除', '', 'admin:campus:delivery:fee:delete', '', 'A', 15, 1, 0, '2026-05-21 00:00:00', '2026-05-21 00:00:00');
+INSERT INTO `eb_system_menu` VALUES (510, 494, '校园商家范围列表', '', 'admin:campus:store:list', '', 'A', 16, 1, 0, '2026-05-21 00:00:00', '2026-05-21 00:00:00');
+INSERT INTO `eb_system_menu` VALUES (511, 494, '校园商家范围新增', '', 'admin:campus:store:save', '', 'A', 17, 1, 0, '2026-05-21 00:00:00', '2026-05-21 00:00:00');
+INSERT INTO `eb_system_menu` VALUES (512, 494, '校园商家范围修改', '', 'admin:campus:store:update', '', 'A', 18, 1, 0, '2026-05-21 00:00:00', '2026-05-21 00:00:00');
+INSERT INTO `eb_system_menu` VALUES (513, 494, '校园商家范围状态', '', 'admin:campus:store:update:status', '', 'A', 19, 1, 0, '2026-05-21 00:00:00', '2026-05-21 00:00:00');
+INSERT INTO `eb_system_menu` VALUES (514, 494, '校园商家范围删除', '', 'admin:campus:store:delete', '', 'A', 20, 1, 0, '2026-05-21 00:00:00', '2026-05-21 00:00:00');
 
 -- ----------------------------
 -- Table structure for eb_system_notification
@@ -10453,5 +10474,116 @@ INSERT INTO `qrtz_triggers` VALUES ('quartzScheduler', 'TASK_6', 'DEFAULT', 'TAS
 INSERT INTO `qrtz_triggers` VALUES ('quartzScheduler', 'TASK_7', 'DEFAULT', 'TASK_7', 'DEFAULT', NULL, 1750749240000, 1750749180000, 5, 'WAITING', 'CRON', 1733477285000, 0, NULL, 1, '');
 INSERT INTO `qrtz_triggers` VALUES ('quartzScheduler', 'TASK_8', 'DEFAULT', 'TASK_8', 'DEFAULT', NULL, 1750749240000, 1750749180000, 5, 'WAITING', 'CRON', 1733477284000, 0, NULL, 1, '');
 INSERT INTO `qrtz_triggers` VALUES ('quartzScheduler', 'TASK_9', 'DEFAULT', 'TASK_9', 'DEFAULT', NULL, 1750749240000, 1750749180000, 5, 'WAITING', 'CRON', 1733477284000, 0, NULL, 1, '');
+
+-- ----------------------------
+-- Table structure for eb_campus_school
+-- ----------------------------
+DROP TABLE IF EXISTS `eb_campus_school`;
+CREATE TABLE `eb_campus_school`  (
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Campus school id',
+  `school_name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'School name',
+  `campus_name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'Campus name',
+  `status` tinyint(1) NOT NULL DEFAULT 1 COMMENT 'Enabled status',
+  `sort` int(10) NOT NULL DEFAULT 0 COMMENT 'Sort value',
+  `is_del` tinyint(1) NOT NULL DEFAULT 0 COMMENT 'Deleted flag',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Create time',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Update time',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_campus_school_status`(`status`, `is_del`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = 'Campus school and campus area' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Table structure for eb_campus_building
+-- ----------------------------
+DROP TABLE IF EXISTS `eb_campus_building`;
+CREATE TABLE `eb_campus_building`  (
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Campus building id',
+  `school_id` int(10) UNSIGNED NOT NULL COMMENT 'Campus school id',
+  `building_name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'Building name',
+  `max_floor` int(10) NOT NULL COMMENT 'Maximum floor',
+  `status` tinyint(1) NOT NULL DEFAULT 1 COMMENT 'Enabled status',
+  `sort` int(10) NOT NULL DEFAULT 0 COMMENT 'Sort value',
+  `is_del` tinyint(1) NOT NULL DEFAULT 0 COMMENT 'Deleted flag',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Create time',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Update time',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_campus_building_school`(`school_id`, `status`, `is_del`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = 'Campus dormitory building' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Table structure for eb_campus_delivery_config
+-- ----------------------------
+DROP TABLE IF EXISTS `eb_campus_delivery_config`;
+CREATE TABLE `eb_campus_delivery_config`  (
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Campus delivery config id',
+  `school_id` int(10) UNSIGNED NOT NULL COMMENT 'Campus school id',
+  `start_price` decimal(10, 2) NOT NULL DEFAULT 0.00 COMMENT 'Order start price',
+  `rain_fee_enabled` tinyint(1) NOT NULL DEFAULT 0 COMMENT 'Rain fee switch',
+  `rain_fee` decimal(10, 2) NOT NULL DEFAULT 0.00 COMMENT 'Rain delivery fee',
+  `is_del` tinyint(1) NOT NULL DEFAULT 0 COMMENT 'Deleted flag',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Create time',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Update time',
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `uk_campus_delivery_school`(`school_id`, `is_del`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = 'Campus delivery price config' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Table structure for eb_campus_floor_delivery_fee
+-- ----------------------------
+DROP TABLE IF EXISTS `eb_campus_floor_delivery_fee`;
+CREATE TABLE `eb_campus_floor_delivery_fee`  (
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Campus floor fee id',
+  `building_id` int(10) UNSIGNED NOT NULL COMMENT 'Campus building id',
+  `floor_no` int(10) NOT NULL COMMENT 'Floor number',
+  `delivery_fee` decimal(10, 2) NOT NULL DEFAULT 0.00 COMMENT 'Floor delivery fee',
+  `is_del` tinyint(1) NOT NULL DEFAULT 0 COMMENT 'Deleted flag',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Create time',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Update time',
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `uk_campus_floor_fee`(`building_id`, `floor_no`, `is_del`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = 'Campus floor delivery fee' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Table structure for eb_campus_store_range
+-- ----------------------------
+DROP TABLE IF EXISTS `eb_campus_store_range`;
+CREATE TABLE `eb_campus_store_range`  (
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Campus store range id',
+  `school_id` int(10) UNSIGNED NOT NULL COMMENT 'Campus school id',
+  `store_id` int(10) UNSIGNED NOT NULL COMMENT 'System store id',
+  `status` tinyint(1) NOT NULL DEFAULT 1 COMMENT 'Enabled status',
+  `sort` int(10) NOT NULL DEFAULT 0 COMMENT 'Sort value',
+  `is_del` tinyint(1) NOT NULL DEFAULT 0 COMMENT 'Deleted flag',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Create time',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Update time',
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `uk_campus_store_range`(`school_id`, `store_id`, `is_del`) USING BTREE,
+  INDEX `idx_campus_store_school`(`school_id`, `status`, `is_del`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = 'Campus store school service range' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Table structure for eb_campus_address
+-- ----------------------------
+DROP TABLE IF EXISTS `eb_campus_address`;
+CREATE TABLE `eb_campus_address`  (
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Campus address id',
+  `uid` int(10) UNSIGNED NOT NULL COMMENT 'User id',
+  `school_id` int(10) UNSIGNED NOT NULL COMMENT 'Campus school id',
+  `building_id` int(10) UNSIGNED NOT NULL COMMENT 'Campus building id',
+  `school_name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'School snapshot',
+  `campus_name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'Campus snapshot',
+  `building_name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'Building snapshot',
+  `floor_no` int(10) NOT NULL COMMENT 'Floor number',
+  `room_no` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'Room number',
+  `contact_name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'Contact name',
+  `contact_phone` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'Contact phone',
+  `is_default` tinyint(1) NOT NULL DEFAULT 0 COMMENT 'Default address',
+  `remark` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT 'Address remark',
+  `is_del` tinyint(1) NOT NULL DEFAULT 0 COMMENT 'Deleted flag',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Create time',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Update time',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_campus_address_user`(`uid`, `is_default`, `is_del`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = 'Campus student address' ROW_FORMAT = DYNAMIC;
 
 SET FOREIGN_KEY_CHECKS = 1;

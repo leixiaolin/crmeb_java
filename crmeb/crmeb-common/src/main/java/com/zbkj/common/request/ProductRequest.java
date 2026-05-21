@@ -34,6 +34,9 @@ public class ProductRequest implements Serializable {
     @ApiModelProperty(value = "分类id")
     private String cid;
 
+    @ApiModelProperty(value = "商户id")
+    private Integer merId;
+
     @ApiModelProperty(value = "价格排序", allowableValues = "range[asc,desc]")
     private String priceOrder;
 

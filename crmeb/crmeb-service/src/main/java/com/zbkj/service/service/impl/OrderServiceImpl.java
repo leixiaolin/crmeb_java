@@ -15,6 +15,7 @@ import com.zbkj.common.model.bargain.StoreBargainUser;
 import com.zbkj.common.model.cat.StoreCart;
 import com.zbkj.common.model.category.Category;
 import com.zbkj.common.model.combination.StoreCombination;
+import com.zbkj.common.model.campus.CampusAddress;
 import com.zbkj.common.model.coupon.StoreCouponUser;
 import com.zbkj.common.model.express.Express;
 import com.zbkj.common.model.express.ShippingTemplates;
@@ -97,6 +98,12 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private UserAddressService userAddressService;
+
+    @Autowired
+    private CampusAddressService campusAddressService;
+
+    @Autowired
+    private CampusDeliveryService campusDeliveryService;
 
     @Autowired
     private SystemConfigService systemConfigService;
@@ -978,6 +985,15 @@ public class OrderServiceImpl implements OrderService {
             }
             verifyCode = CrmebUtil.randomCount(1111111111, 999999999) + "";
             userAddressStr = systemStore.getName();
+        } else if (request.getShippingType() == 3) {
+            if (ObjectUtil.isNull(request.getCampusAddressId()) || request.getCampusAddressId() <= 0) {
+                throw new CrmebException("Please select campus address");
+            }
+            CampusAddress campusAddress = campusAddressService.getDetail(request.getCampusAddressId());
+            request.setRealName(campusAddress.getContactName());
+            request.setPhone(campusAddress.getContactPhone());
+            userAddressStr = campusAddress.getSchoolName() + campusAddress.getCampusName()
+                    + campusAddress.getBuildingName() + campusAddress.getFloorNo() + "F" + campusAddress.getRoomNo();
         }
 
         // 活动商品校验
@@ -999,6 +1015,7 @@ public class OrderServiceImpl implements OrderService {
         OrderComputedPriceRequest orderComputedPriceRequest = new OrderComputedPriceRequest();
         orderComputedPriceRequest.setShippingType(request.getShippingType());
         orderComputedPriceRequest.setAddressId(request.getAddressId());
+        orderComputedPriceRequest.setCampusAddressId(request.getCampusAddressId());
         orderComputedPriceRequest.setCouponId(request.getCouponId());
         orderComputedPriceRequest.setUseIntegral(request.getUseIntegral());
         ComputedOrderPriceResponse computedOrderPriceResponse = computedPrice(orderComputedPriceRequest, orderInfoVo, user);
@@ -1445,6 +1462,7 @@ public class OrderServiceImpl implements OrderService {
      */
     private List<OrderInfoDetailVo> validatePreOrderShopping(PreOrderRequest request, User user) {
         List<OrderInfoDetailVo> detailVoList = CollUtil.newArrayList();
+        Integer[] shoppingMerId = new Integer[1];
         SystemUserLevel userLevel = null;
         if (user.getLevel() > 0) {
             userLevel = systemUserLevelService.getByLevelId(user.getLevel());
@@ -1468,6 +1486,12 @@ public class OrderServiceImpl implements OrderService {
             }
             if (!storeProduct.getIsShow()) {
                 throw new CrmebException("商品已下架，请刷新后重新选择");
+            }
+            Integer currentMerId = ObjectUtil.defaultIfNull(storeProduct.getMerId(), 0);
+            if (ObjectUtil.isNull(shoppingMerId[0])) {
+                shoppingMerId[0] = currentMerId;
+            } else if (!shoppingMerId[0].equals(currentMerId) && (shoppingMerId[0] > 0 || currentMerId > 0)) {
+                throw new CrmebException("Campus order only supports products from one store");
             }
             if (storeProduct.getStock() < storeCart.getCartNum()) {
                 throw new CrmebException("商品库存不足，请刷新后重新选择");
@@ -2081,6 +2105,17 @@ public class OrderServiceImpl implements OrderService {
         // 计算运费
         if (request.getShippingType().equals(2)) {// 到店自提，不计算运费
             priceResponse.setFreightFee(BigDecimal.ZERO);
+        } else if (request.getShippingType().equals(3)) {
+            if (ObjectUtil.isNull(request.getCampusAddressId()) || request.getCampusAddressId() <= 0) {
+                priceResponse.setFreightFee(BigDecimal.ZERO);
+            } else {
+                CampusAddress campusAddress = campusAddressService.getDetail(request.getCampusAddressId());
+                CampusDeliveryQuoteResponse quote = campusDeliveryService.quote(campusAddress.getBuildingId(), campusAddress.getFloorNo());
+                if (orderInfoVo.getProTotalFee().compareTo(quote.getStartPrice()) < 0) {
+                    throw new CrmebException("Campus order does not meet start price");
+                }
+                priceResponse.setFreightFee(quote.getDeliveryFee());
+            }
         } else if (ObjectUtil.isNull(request.getAddressId()) || request.getAddressId() <= 0) {
             // 快递配送，无地址
             priceResponse.setFreightFee(BigDecimal.ZERO);
