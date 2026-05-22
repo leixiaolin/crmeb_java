@@ -97,6 +97,13 @@ public interface StoreOrderService extends IService<StoreOrder> {
     String send(StoreOrderSendRequest request);
 
     /**
+     * 平台标记校园配送订单已送达
+     * @param orderNo 订单号
+     * @return 更新结果
+     */
+    Boolean markCampusDelivered(String orderNo);
+
+    /**
      * 订单备注
      * @param orderNo 订单编号
      * @param mark 备注

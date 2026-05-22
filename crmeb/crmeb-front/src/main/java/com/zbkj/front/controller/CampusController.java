@@ -8,7 +8,9 @@ import com.zbkj.common.request.CampusAddressRequest;
 import com.zbkj.common.request.PageParamRequest;
 import com.zbkj.common.request.UserAddressDelRequest;
 import com.zbkj.common.response.CampusDeliveryQuoteResponse;
+import com.zbkj.common.response.CampusSearchResponse;
 import com.zbkj.common.response.CampusStoreRangeResponse;
+import com.zbkj.common.response.StoreProductReplyResponse;
 import com.zbkj.common.result.CommonResult;
 import com.zbkj.service.service.CampusAddressService;
 import com.zbkj.service.service.CampusBuildingService;
@@ -102,5 +104,21 @@ public class CampusController {
     @RequestMapping(value = "/store/list", method = RequestMethod.GET)
     public CommonResult<List<CampusStoreRangeResponse>> storeList(@RequestParam Integer schoolId) {
         return CommonResult.success(campusStoreRangeService.getEnabledList(schoolId));
+    }
+
+    @ApiOperation(value = "Campus store reply list")
+    @RequestMapping(value = "/store/reply/list", method = RequestMethod.GET)
+    public CommonResult<CommonPage<StoreProductReplyResponse>> storeReplyList(@RequestParam Integer schoolId,
+                                                                              @RequestParam Integer storeId,
+                                                                              @Validated PageParamRequest pageParamRequest) {
+        return CommonResult.success(CommonPage.restPage(campusStoreRangeService.getReplyList(schoolId, storeId, pageParamRequest)));
+    }
+
+    @ApiOperation(value = "Campus store and product search")
+    @RequestMapping(value = "/search", method = RequestMethod.GET)
+    public CommonResult<CampusSearchResponse> search(@RequestParam Integer schoolId,
+                                                    @RequestParam String keyword,
+                                                    @Validated PageParamRequest pageParamRequest) {
+        return CommonResult.success(campusStoreRangeService.search(schoolId, keyword, pageParamRequest));
     }
 }

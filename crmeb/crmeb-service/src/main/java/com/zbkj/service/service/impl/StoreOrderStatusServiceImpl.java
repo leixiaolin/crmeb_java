@@ -113,6 +113,23 @@ public class StoreOrderStatusServiceImpl extends ServiceImpl<StoreOrderStatusDao
         return dao.selectList(lambdaQueryWrapper);
     }
 
+    @Override
+    public List<StoreOrderStatus> getCampusStatusLogList(Integer orderId) {
+        LambdaQueryWrapper<StoreOrderStatus> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(StoreOrderStatus::getOid, orderId);
+        wrapper.in(StoreOrderStatus::getChangeType,
+                Constants.ORDER_LOG_CAMPUS_ACCEPT,
+                Constants.ORDER_LOG_CAMPUS_REJECT,
+                Constants.ORDER_LOG_CAMPUS_DELIVERED,
+                Constants.ORDER_LOG_CAMPUS_COMPLETED,
+                Constants.ORDER_LOG_CAMPUS_CANCEL,
+                Constants.ORDER_LOG_REFUND_APPLY,
+                Constants.ORDER_LOG_REFUND_REFUSE,
+                Constants.ORDER_LOG_REFUND_PRICE);
+        wrapper.orderByDesc(StoreOrderStatus::getCreateTime);
+        return dao.selectList(wrapper);
+    }
+
     /**
      * 根据订单id获取最后一条记录
      * @param orderId 订单id

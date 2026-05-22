@@ -50,4 +50,10 @@ public interface SystemStoreStaffService extends IService<SystemStoreStaff> {
      */
     Boolean updateStatus(Integer id, Integer status);
 
+    /**
+     * 获取当前启用的门店店员
+     * @param uid 用户id
+     */
+    SystemStoreStaff getEnabledByUid(Integer uid);
+
 }

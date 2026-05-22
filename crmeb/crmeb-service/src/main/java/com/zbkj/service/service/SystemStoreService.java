@@ -95,4 +95,12 @@ public interface SystemStoreService extends IService<SystemStore> {
      * @return SystemStore
      */
     SystemStore getInfo(Integer id);
+
+    /**
+     * Check whether the store is inside its daily business time window.
+     *
+     * @param systemStore store detail
+     * @return true when the current local time is inside the configured window
+     */
+    Boolean isOpenNow(SystemStore systemStore);
 }

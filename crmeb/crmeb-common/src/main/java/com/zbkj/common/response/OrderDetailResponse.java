@@ -60,6 +60,9 @@ public class OrderDetailResponse implements Serializable {
     @ApiModelProperty(value = "订单状态（0：待发货；1：待收货；2：已收货，待评价；3：已完成；）")
     private Integer status;
 
+    @ApiModelProperty(value = "校园订单状态：0待付款，10待接单，20配送中，-10已取消")
+    private Integer campusStatus;
+
     @ApiModelProperty(value = "订单状态")
     private String orderStatus;
 

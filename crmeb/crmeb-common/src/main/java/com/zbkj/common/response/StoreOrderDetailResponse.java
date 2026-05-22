@@ -49,6 +49,9 @@ public class StoreOrderDetailResponse implements Serializable {
     @ApiModelProperty(value = "订单状态（0：待发货；1：待收货；2：已收货，待评价；3：已完成；）")
     private Integer status;
 
+    @ApiModelProperty(value = "校园订单状态：0待付款，10待接单，20配送中，30已送达，40已完成，-10已取消")
+    private Integer campusStatus;
+
     @ApiModelProperty(value = "商品信息")
     private List<StoreOrderInfoOldVo> productList = new ArrayList<>();
 
@@ -90,6 +93,30 @@ public class StoreOrderDetailResponse implements Serializable {
 
     @ApiModelProperty(value = "订单管理员备注")
     private String remark;
+
+    @ApiModelProperty(value = "Campus order cutlery count")
+    private Integer cutleryCount;
+
+    @ApiModelProperty(value = "Campus order appointment date")
+    private String campusAppointmentDate;
+
+    @ApiModelProperty(value = "Campus order appointment delivery time slot")
+    private String campusAppointmentSlot;
+
+    @ApiModelProperty(value = "Campus order school snapshot")
+    private String campusSchoolName;
+
+    @ApiModelProperty(value = "Campus order campus snapshot")
+    private String campusName;
+
+    @ApiModelProperty(value = "Campus order building snapshot")
+    private String campusBuildingName;
+
+    @ApiModelProperty(value = "Campus order floor snapshot")
+    private Integer campusFloorNo;
+
+    @ApiModelProperty(value = "Campus order room snapshot")
+    private String campusRoomNo;
 
     @ApiModelProperty(value = "用户姓名")
     private String realName;

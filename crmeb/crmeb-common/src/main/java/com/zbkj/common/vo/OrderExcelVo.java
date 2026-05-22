@@ -79,6 +79,15 @@ public class OrderExcelVo implements Serializable {
     @ApiModelProperty(value = "用户姓名")
     private String realName;
 
+    @ApiModelProperty(value = "校园履约状态")
+    private String campusStatus;
+
+    @ApiModelProperty(value = "校园配送地址")
+    private String campusAddress;
+
+    @ApiModelProperty(value = "校园预约配送")
+    private String campusAppointment;
+
 //    @ApiModelProperty(value = "支付状态")
 //    private String paid;
 //

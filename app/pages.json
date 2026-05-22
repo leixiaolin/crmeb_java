@@ -274,6 +274,71 @@
 					}
 				},
 				{
+					"path": "campus_merchant_orders/index",
+					"style": {
+						"navigationBarTitleText": "校园商家订单",
+						"app-plus": {
+							// #ifdef APP-PLUS
+							"titleNView": {
+								"type": "default"
+							}
+							// #endif
+						}
+					}
+				},
+				{
+					"path": "campus_merchant_order_detail/index",
+					"style": {
+						"navigationBarTitleText": "校园订单详情",
+						"app-plus": {
+							// #ifdef APP-PLUS
+							"titleNView": {
+								"type": "default"
+							}
+							// #endif
+						}
+					}
+				},
+				{
+					"path": "campus_merchant_products/index",
+					"style": {
+						"navigationBarTitleText": "校园商品维护",
+						"app-plus": {
+							// #ifdef APP-PLUS
+							"titleNView": {
+								"type": "default"
+							}
+							// #endif
+						}
+					}
+				},
+				{
+					"path": "campus_merchant_product_specs/index",
+					"style": {
+						"navigationBarTitleText": "商品规格维护",
+						"app-plus": {
+							// #ifdef APP-PLUS
+							"titleNView": {
+								"type": "default"
+							}
+							// #endif
+						}
+					}
+				},
+				{
+					"path": "campus_merchant_replies/index",
+					"style": {
+						"navigationBarTitleText": "校园评价回复",
+						"app-plus": {
+							// #ifdef APP-PLUS
+							"titleNView": {
+								"type": "default"
+							}
+							// #endif
+						}
+					}
+				},
+				{
 					"path": "user_payment/index",
 					"style": {
 						"navigationBarTitleText": "余额充值",

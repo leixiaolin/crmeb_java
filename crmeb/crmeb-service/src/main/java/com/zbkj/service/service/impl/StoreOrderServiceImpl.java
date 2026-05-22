@@ -155,7 +155,7 @@ public class StoreOrderServiceImpl extends ServiceImpl<StoreOrderDao, StoreOrder
         queryWrapper.select("id", "order_id", "uid", "real_name", "pay_price", "pay_type", "create_time", "status", "refund_status"
                 , "refund_reason_wap_img", "refund_reason_wap_explain", "refund_reason_wap", "refund_reason", "refund_reason_time"
                 , "is_del", "combination_id", "pink_id", "seckill_id", "bargain_id", "verify_code", "remark", "paid", "is_system_del"
-                , "shipping_type", "type", "is_alter_price", "pro_total_price", "is_alter_price", "coupon_price");
+                , "shipping_type", "campus_status", "type", "is_alter_price", "pro_total_price", "is_alter_price", "coupon_price");
         if (StrUtil.isNotBlank(request.getOrderNo())) {
             queryWrapper.eq("order_id", request.getOrderNo());
         }
@@ -164,7 +164,20 @@ public class StoreOrderServiceImpl extends ServiceImpl<StoreOrderDao, StoreOrder
         if (!request.getType().equals(2)) {
             queryWrapper.eq("type", request.getType());
         }
-        queryWrapper.orderByDesc("id");
+        if (Boolean.TRUE.equals(request.getCampusOnly())) {
+            queryWrapper.eq("shipping_type", 3);
+        }
+        if (ObjectUtil.isNotNull(request.getCampusStatus())) {
+            queryWrapper.eq("shipping_type", 3);
+            queryWrapper.eq("campus_status", request.getCampusStatus());
+        }
+        if (Boolean.TRUE.equals(request.getCampusDeliverySort())) {
+            queryWrapper.eq("shipping_type", 3);
+            queryWrapper.orderByAsc("campus_building_name", "campus_floor_no", "campus_room_no");
+            queryWrapper.orderByDesc("id");
+        } else {
+            queryWrapper.orderByDesc("id");
+        }
         List<StoreOrder> orderList = dao.selectList(queryWrapper);
         List<StoreOrderDetailResponse> detailResponseList = new ArrayList<>();
         if (CollUtil.isNotEmpty(orderList)) {
@@ -717,6 +730,35 @@ public class StoreOrderServiceImpl extends ServiceImpl<StoreOrderDao, StoreOrder
         return mianDanResult;
     }
 
+    @Override
+    public Boolean markCampusDelivered(String orderNo) {
+        StoreOrder storeOrder = getInfoException(orderNo);
+        if (!storeOrder.getPaid() || !storeOrder.getShippingType().equals(3)) {
+            throw new CrmebException("Only paid campus orders can update delivery status");
+        }
+        if (!storeOrder.getRefundStatus().equals(0)) {
+            throw new CrmebException("Campus order refund is already processing");
+        }
+        if (!Objects.equals(Constants.CAMPUS_ORDER_STATUS_DELIVERING, storeOrder.getCampusStatus())) {
+            throw new CrmebException("Campus order is not delivering");
+        }
+        Boolean execute = transactionTemplate.execute(e -> {
+            LambdaUpdateWrapper<StoreOrder> wrapper = Wrappers.lambdaUpdate();
+            wrapper.set(StoreOrder::getCampusStatus, Constants.CAMPUS_ORDER_STATUS_DELIVERED);
+            wrapper.set(StoreOrder::getStatus, Constants.ORDER_STATUS_INT_SPIKE);
+            wrapper.set(StoreOrder::getUpdateTime, DateUtil.date());
+            wrapper.eq(StoreOrder::getId, storeOrder.getId());
+            wrapper.eq(StoreOrder::getCampusStatus, Constants.CAMPUS_ORDER_STATUS_DELIVERING);
+            if (!update(wrapper)) {
+                throw new CrmebException("Campus delivery status update failed");
+            }
+            storeOrderStatusService.createLog(storeOrder.getId(), Constants.ORDER_LOG_CAMPUS_DELIVERED,
+                    Constants.ORDER_LOG_MESSAGE_CAMPUS_DELIVERED);
+            return Boolean.TRUE;
+        });
+        return Boolean.TRUE.equals(execute);
+    }
+
     /**
      * 订单备注
      * @param orderNo 订单编号
@@ -959,6 +1001,7 @@ public class StoreOrderServiceImpl extends ServiceImpl<StoreOrderDao, StoreOrder
         LambdaUpdateWrapper<StoreOrder> lqw = new LambdaUpdateWrapper<>();
         lqw.set(StoreOrder::getPaid, true);
         lqw.set(StoreOrder::getPayTime, CrmebDateUtil.nowDateTime());
+        lqw.setSql("campus_status = CASE WHEN shipping_type = 3 THEN " + Constants.CAMPUS_ORDER_STATUS_PENDING_ACCEPT + " ELSE campus_status END");
         lqw.eq(StoreOrder::getOrderId, orderNo);
         lqw.eq(StoreOrder::getPaid,false);
         return update(lqw);

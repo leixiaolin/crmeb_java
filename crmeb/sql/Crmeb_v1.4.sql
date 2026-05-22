@@ -2167,6 +2167,7 @@ CREATE TABLE `eb_store_order`  (
   `refund_reason` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '不退款的理由',
   `refund_reason_time` timestamp NULL DEFAULT NULL COMMENT '退款时间',
   `refund_price` decimal(8, 2) UNSIGNED NOT NULL DEFAULT 0.00 COMMENT '退款金额',
+  `refund_apply_price` decimal(8, 2) UNSIGNED NOT NULL DEFAULT 0.00 COMMENT '申请退款金额',
   `delivery_name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '快递名称/送货人姓名',
   `delivery_type` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '发货类型 express 发货，send 送货，fictitious虚拟',
   `delivery_id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '快递单号/手机号',
@@ -2265,7 +2266,18 @@ INSERT INTO `eb_store_order` VALUES (43, 'order29640175066454449049472', 41, '�
 INSERT INTO `eb_store_order` VALUES (44, 'order96230175066471646892698', 41, '丹丹', '18800000000', '大粽子杂货店', 0.00, 1, 160.72, 0.00, 160.72, 0.00, 0.00, 0, 0.00, 1, '2025-06-23 15:45:20', 'yue', '2025-06-23 15:45:16', 2, 0, NULL, NULL, NULL, NULL, NULL, 0.00, NULL, NULL, NULL, 170, 0, 0, '', 0, NULL, 0, 0, 0, 0, 0.00, 0, 0, '1108620838', 3, 2, 6, 3, 0, 0, '2025-06-23 15:49:51', NULL, 0, 0, 160.72, 0.00, 0, NULL, NULL, NULL, NULL, NULL, NULL);
 INSERT INTO `eb_store_order` VALUES (45, 'order26567175066604493426599', 41, '月月', '15829041959', '陕西省咸阳市秦都区西咸大厦', 0.00, 1, 124.00, 10.00, 124.00, 10.00, 0.00, 0, 0.00, 0, NULL, '', '2025-06-23 16:07:24', 0, 0, NULL, NULL, NULL, NULL, NULL, 0.00, NULL, NULL, NULL, 124, 0, 0, '', 1, NULL, 0, 0, 39, 0, 0.00, 0, 0, '', 0, 1, 0, 0, 0, 1, '2025-06-23 17:08:00', NULL, 0, 0, 114.00, 0.00, 0, NULL, NULL, NULL, NULL, NULL, NULL);
 
+ALTER TABLE `eb_store_order` ADD COLUMN `cutlery_count` tinyint(3) UNSIGNED NOT NULL DEFAULT 0 COMMENT '校园订单餐具份数' AFTER `mark`;
+ALTER TABLE `eb_store_order` ADD COLUMN `campus_appointment_date` varchar(10) NOT NULL DEFAULT '' COMMENT 'Campus appointment date' AFTER `cutlery_count`;
+ALTER TABLE `eb_store_order` ADD COLUMN `campus_appointment_slot` varchar(32) NOT NULL DEFAULT '' COMMENT 'Campus appointment delivery time slot' AFTER `campus_appointment_date`;
+ALTER TABLE `eb_store_order` ADD COLUMN `campus_status` smallint(4) NOT NULL DEFAULT 0 COMMENT '校园订单状态：0待付款，10待接单，20配送中，-10已取消' AFTER `campus_appointment_slot`;
+
 -- ----------------------------
+ALTER TABLE `eb_store_order` ADD COLUMN `campus_school_name` varchar(64) NOT NULL DEFAULT '' COMMENT 'Campus school snapshot' AFTER `campus_status`;
+ALTER TABLE `eb_store_order` ADD COLUMN `campus_name` varchar(64) NOT NULL DEFAULT '' COMMENT 'Campus area snapshot' AFTER `campus_school_name`;
+ALTER TABLE `eb_store_order` ADD COLUMN `campus_building_name` varchar(64) NOT NULL DEFAULT '' COMMENT 'Campus building snapshot' AFTER `campus_name`;
+ALTER TABLE `eb_store_order` ADD COLUMN `campus_floor_no` int(10) NOT NULL DEFAULT 0 COMMENT 'Campus floor snapshot' AFTER `campus_building_name`;
+ALTER TABLE `eb_store_order` ADD COLUMN `campus_room_no` varchar(32) NOT NULL DEFAULT '' COMMENT 'Campus room snapshot' AFTER `campus_floor_no`;
+
 -- Table structure for eb_store_order_info
 -- ----------------------------
 DROP TABLE IF EXISTS `eb_store_order_info`;
@@ -8278,6 +8290,7 @@ INSERT INTO `eb_system_menu` VALUES (511, 494, '校园商家范围新增', '', '
 INSERT INTO `eb_system_menu` VALUES (512, 494, '校园商家范围修改', '', 'admin:campus:store:update', '', 'A', 18, 1, 0, '2026-05-21 00:00:00', '2026-05-21 00:00:00');
 INSERT INTO `eb_system_menu` VALUES (513, 494, '校园商家范围状态', '', 'admin:campus:store:update:status', '', 'A', 19, 1, 0, '2026-05-21 00:00:00', '2026-05-21 00:00:00');
 INSERT INTO `eb_system_menu` VALUES (514, 494, '校园商家范围删除', '', 'admin:campus:store:delete', '', 'A', 20, 1, 0, '2026-05-21 00:00:00', '2026-05-21 00:00:00');
+INSERT INTO `eb_system_menu` VALUES (515, 494, '校园订单配送状态更新', '', 'admin:campus:order:delivery:update', '', 'A', 21, 1, 0, '2026-05-22 00:00:00', '2026-05-22 00:00:00');
 
 -- ----------------------------
 -- Table structure for eb_system_notification
@@ -9093,6 +9106,7 @@ CREATE TABLE `eb_system_store`  (
   `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '门店名称',
   `introduction` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '简介',
+  `notice` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '公告',
   `phone` char(25) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '手机号码',
   `address` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '省市区',
   `detailed_address` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '详细地址',
@@ -9112,8 +9126,8 @@ CREATE TABLE `eb_system_store`  (
 -- ----------------------------
 -- Records of eb_system_store
 -- ----------------------------
-INSERT INTO `eb_system_store` VALUES (3, '大粽子杂货店', '大粽子杂货店', '18292417675', '北京市,北京市,东城区', '长安街1号', 'crmebimage/public/product/2025/05/30/f6dc9f3df7b947eabcbe1419f3fcc83ecslaa1ghjs.png', '108.705567', '34.329028', '', '08:00:00,23:00:00', 1, 0, '2024-11-28 16:57:41', '2025-05-30 16:14:50');
-INSERT INTO `eb_system_store` VALUES (4, '小丸子提货点', '零售提货', '15829041959', '陕西省,西安市,雁塔区', '丈八一路汇鑫IBC', 'crmebimage/public/content/2025/05/30/f445c2913ade47c59ec8141fe49e57bcus892ib3ld.png', '108.885791', '34.197719', '', '08:00:00,14:00:00', 1, 0, '2024-12-03 10:19:14', '2025-05-30 16:14:39');
+INSERT INTO `eb_system_store` VALUES (3, '大粽子杂货店', '大粽子杂货店', '', '18292417675', '北京市,北京市,东城区', '长安街1号', 'crmebimage/public/product/2025/05/30/f6dc9f3df7b947eabcbe1419f3fcc83ecslaa1ghjs.png', '108.705567', '34.329028', '', '08:00:00,23:00:00', 1, 0, '2024-11-28 16:57:41', '2025-05-30 16:14:50');
+INSERT INTO `eb_system_store` VALUES (4, '小丸子提货点', '零售提货', '', '15829041959', '陕西省,西安市,雁塔区', '丈八一路汇鑫IBC', 'crmebimage/public/content/2025/05/30/f445c2913ade47c59ec8141fe49e57bcus892ib3ld.png', '108.885791', '34.197719', '', '08:00:00,14:00:00', 1, 0, '2024-12-03 10:19:14', '2025-05-30 16:14:39');
 
 -- ----------------------------
 -- Table structure for eb_system_store_staff

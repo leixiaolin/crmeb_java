@@ -70,6 +70,22 @@
 									</view>
 								</block>
 							</view>
+							<view class="campus-merchant-entry flex" @click="menusTap('/pages/users/campus_address_list/index')">
+								<view>校园地址</view>
+								<text class="iconfont icon-xiangyou"></text>
+							</view>
+							<view v-if="campusMerchantAccess" class="campus-merchant-entry flex" @click="menusTap('/pages/users/campus_merchant_orders/index')">
+								<view>校园商家订单</view>
+								<text class="iconfont icon-xiangyou"></text>
+							</view>
+							<view v-if="campusMerchantAccess" class="campus-merchant-entry flex" @click="menusTap('/pages/users/campus_merchant_products/index')">
+								<view>校园商品维护</view>
+								<text class="iconfont icon-xiangyou"></text>
+							</view>
+							<view v-if="campusMerchantAccess" class="campus-merchant-entry flex" @click="menusTap('/pages/users/campus_merchant_replies/index')">
+								<view>校园评价回复</view>
+								<text class="iconfont icon-xiangyou"></text>
+							</view>
 						</view>
 					</view>
 					<view class="contenBox" id="pageIndex">
@@ -137,6 +153,7 @@
 	import {getMenuList, copyrightApi} from '@/api/user.js';
 	import {orderData} from '@/api/order.js';
 	import {getCity, tokenIsExistApi} from '@/api/api.js';
+	import {campusMerchantAccessApi} from '@/api/campus.js';
 	import {toLogin} from '@/libs/login.js';
 	import {mapGetters} from "vuex";
 	import {
@@ -195,6 +212,7 @@
 					wx_chant_independent:'open'
 				} ,//客服配置
 				userInfo: {},
+				campusMerchantAccess: false,
 				copyImage: '',//版权图片
 			}
 		},
@@ -268,10 +286,12 @@
 					let tokenIsExist = res.data;
 					if (this.isLogin && tokenIsExist) {
 						this.getOrderData();
+						this.getCampusMerchantAccess();
 						this.$store.dispatch('USERINFO').then(res => {
 							this.userInfo = res;
 						});
 					}else{
+						this.campusMerchantAccess = false;
 						this.$store.commit("LOGOUT");
 						this.$store.commit('UPDATE_LOGIN', '');
 						this.$store.commit('UPDATE_USERINFO', {});
@@ -390,6 +410,13 @@
 					})
 					that.$set(that, 'orderMenu', that.orderMenu);
 				})
+			},
+			getCampusMerchantAccess() {
+				campusMerchantAccessApi().then(res => {
+					this.campusMerchantAccess = !!res.data;
+				}).catch(() => {
+					this.campusMerchantAccess = false;
+				});
 			},
 			// 打开授权
 			openAuto() {
@@ -706,6 +733,22 @@
 							font-size: 26rpx;
 							color: #454545;
 						}
+					}
+				}
+
+				.campus-merchant-entry {
+					align-items: center;
+					justify-content: space-between;
+					height: 76rpx;
+					margin-top: 28rpx;
+					padding: 0 16rpx;
+					border-top: 1rpx solid #eee;
+					color: #333;
+					font-size: 27rpx;
+
+					.icon-xiangyou {
+						color: #999;
+						font-size: 24rpx;
 					}
 				}
 			}

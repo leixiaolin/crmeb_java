@@ -25,7 +25,10 @@
 					</view>
 					<view class='item acea-row row-between-wrapper'>
 						<view>退款金额</view>
-						<view class='num'>￥{{orderInfo.payPrice}}</view>
+						<view class='num amount'>
+							<text>￥</text>
+							<input v-model="refundAmount" type="digit" placeholder="输入退款金额" />
+						</view>
 					</view>
 					<view class='item acea-row row-between-wrapper' @tap="toggleTab('region')">
 						<view>退款原因</view>
@@ -86,6 +89,7 @@
 				refund_reason_wap_img: [],
 				refund_reason_wap_imgPath: [],
 				orderInfo: {},
+				refundAmount: '',
 				RefundArray: [],
 				index: 0,
 				orderId: 0,
@@ -132,6 +136,7 @@
 				let that = this;
 				applyRefund(that.orderId).then(res => {
 					that.$set(that, 'orderInfo', res.data);
+					that.$set(that, 'refundAmount', res.data.payPrice || '');
 				});
 			},
 			/**
@@ -175,13 +180,17 @@
 			subRefund: Debounce(function(e) {
 				let that = this,
 					value = e.detail.value;
+				let refundAmount = Number(that.refundAmount);
+				if (!refundAmount || refundAmount <= 0) return this.$util.Tips({ title: '请输入有效退款金额' });
+				if (refundAmount > Number(that.orderInfo.payPrice || 0)) return this.$util.Tips({ title: '退款金额不能大于支付金额' });
 				//收集form表单
 				// if (!value.refund_reason_wap_explain) return this.$util.Tips({title:'请输入退款原因'});
 				orderRefundVerify({
 					text: that.RefundArray[that.index] || '',
 					refund_reason_wap_explain: value.refund_reason_wap_explain,
 					refund_reason_wap_img: that.refund_reason_wap_imgPath.join(','),
-					uni: that.orderId
+					uni: that.orderId,
+					amount: refundAmount
 				}).then(res => {
 					return this.$util.Tips({
 						title: '申请成功',
@@ -228,6 +237,20 @@
 	.apply-return .list .item .num {
 		color: #282828;
 		width: 427rpx;
+		text-align: right;
+	}
+
+	.apply-return .list .item .num.amount {
+		display: flex;
+		align-items: center;
+		justify-content: flex-end;
+	}
+
+	.apply-return .list .item .num.amount input {
+		width: 240rpx;
+		margin-left: 8rpx;
+		color: #282828;
+		font-size: 30rpx;
 		text-align: right;
 	}
 

@@ -602,6 +602,9 @@ public class OrderPayServiceImpl implements OrderPayService {
         }
         storeOrder.setPaid(true);
         storeOrder.setPayTime(CrmebDateUtil.nowDateTime());
+        if (storeOrder.getShippingType().equals(3)) {
+            storeOrder.setCampusStatus(Constants.CAMPUS_ORDER_STATUS_PENDING_ACCEPT);
+        }
         storeOrder.setUpdateTime(DateUtil.date());
         Boolean execute = transactionTemplate.execute(e -> {
             // 订单修改

@@ -38,6 +38,12 @@ public class ComputedOrderPriceResponse implements Serializable {
     @ApiModelProperty(value = "运费金额")
     private BigDecimal freightFee;
 
+    @ApiModelProperty(value = "Campus floor delivery fee")
+    private BigDecimal campusFloorDeliveryFee;
+
+    @ApiModelProperty(value = "Campus rain delivery fee")
+    private BigDecimal campusRainFee;
+
     @ApiModelProperty(value = "实际支付金额")
     private BigDecimal payFee;
 

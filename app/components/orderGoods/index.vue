@@ -60,6 +60,12 @@
 				default: function() {
 					return 0;
 				}
+			},
+			shippingType: {
+				type: Number,
+				default: function() {
+					return 0;
+				}
 			}
 		},
 		data() {
@@ -79,7 +85,7 @@
 		methods: {
 			evaluateTap(item) {
 				uni.navigateTo({
-					url: "/pages/goods/goods_comment_con/index?unique=" + item.attrId + "&orderId=" + this.orderId + '&id=' + this.ids
+					url: "/pages/goods/goods_comment_con/index?unique=" + item.attrId + "&orderId=" + this.orderId + '&id=' + this.ids + '&shippingType=' + this.shippingType
 				})
 			},
 			jumpCon: function(id) {

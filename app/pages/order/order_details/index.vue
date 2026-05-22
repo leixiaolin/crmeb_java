@@ -105,8 +105,35 @@
 					<view class='name'>{{orderInfo.realName}}<text class='phone'>{{orderInfo.userPhone}}</text></view>
 					<view>{{orderInfo.userAddress}}</view>
 				</view>
+				<view v-if="orderInfo.shippingType === 3" class="campusContact borRadius14">
+					<view class="title">履约联系</view>
+					<view class="contactItem acea-row row-between-wrapper" v-if="orderInfo.systemStore && orderInfo.systemStore.phone">
+						<view>
+							<view class="contactName">联系商家</view>
+							<view class="contactHint">{{orderInfo.systemStore.name || ''}}</view>
+						</view>
+						<view class="contactAction font_color" @tap="callCampusStore">拨打</view>
+					</view>
+					<view class="contactItem acea-row row-between-wrapper">
+						<view>
+							<view class="contactName">配送问题</view>
+							<view class="contactHint">首期由平台后台协调配送</view>
+						</view>
+						<view class="contactAction font_color" @tap="callCampusDeliveryService">联系平台</view>
+					</view>
+				</view>
+				<view v-if="orderInfo.shippingType === 3 && orderInfo.campusStatusLogList && orderInfo.campusStatusLogList.length" class="campusTrack borRadius14">
+					<view class="title">配送轨迹</view>
+					<view class="trackItem" v-for="(item, index) in orderInfo.campusStatusLogList" :key="index">
+						<view class="trackDot font_color"></view>
+						<view class="trackMain">
+							<view class="trackMsg">{{item.changeMessage}}</view>
+							<view class="trackTime">{{item.createTime}}</view>
+						</view>
+					</view>
+				</view>
 
-				<orderGoods :evaluate='evaluate' :productType="orderInfo.type" :orderId="order_id" :ids="id" :uniId="uniId" :cartInfo="cartInfo"
+				<orderGoods :evaluate='evaluate' :productType="orderInfo.type" :shippingType="orderInfo.shippingType" :orderId="order_id" :ids="id" :uniId="uniId" :cartInfo="cartInfo"
 					:jump="true"></orderGoods>
 				<!-- #ifndef MP -->
 				<div class="goodCall borRadius14" @click="onClickService">
@@ -135,13 +162,13 @@
 			</view>
 
 			<view class="pad30">
-				<!-- <view class='nav refund' v-if="orderInfo.refundStatus>0">
+				<view class='nav refund' v-if="orderInfo.refundStatus>0 || orderInfo.refundReason">
 					<view class="title">
 						<image src="/static/images/shuoming.png" mode=""></image>
-						{{orderInfo.refundStatus==1?'商家审核中':orderInfo.refundStatus==2?'商家已退款':'商家拒绝退款'}}
+						{{orderInfo.refundStatus==1?'商家审核中':orderInfo.refundStatus==2?'商家已退款':orderInfo.refundStatus==3?'退款处理中':'商家拒绝退款'}}
 					</view>
-					<view class="con pad30">{{orderInfo.refundStatus==1 ? "您已成功发起退款申请，请耐心等待商家处理；退款前请与商家协商一致，有助于更好的处理售后问题": orderInfo.refundStatus==2? "退款已成功受理，如商家已寄出商品请尽快退回；感谢您的支持": "拒绝原因：" + orderInfo.refundReason}}</view>
-				</view> -->
+					<view class="con pad30">{{orderInfo.refundStatus==1 ? "您已成功发起退款申请，请耐心等待商家处理。": orderInfo.refundStatus==2? "退款已成功受理，退款金额以处理结果为准。": orderInfo.refundStatus==3 ? "退款已提交，正在等待退款结果。": "拒绝原因：" + orderInfo.refundReason}}</view>
+				</view>
 				<view class='wrapper borRadius14'>
 					<view class='item acea-row row-between'>
 						<view>订单编号：</view>
@@ -166,6 +193,14 @@
 					<view class='item acea-row row-between'>
 						<view>支付方式：</view>
 						<view class='conter'>{{orderInfo.payTypeStr}}</view>
+					</view>
+					<view class='item acea-row row-between' v-if="orderInfo.shippingType === 3">
+						<view>餐具份数：</view>
+						<view class='conter'>{{orderInfo.cutleryCount ? orderInfo.cutleryCount + '份' : '无需餐具'}}</view>
+					</view>
+					<view class='item acea-row row-between' v-if="orderInfo.shippingType === 3 && orderInfo.campusAppointmentDate">
+						<view>预约配送：</view>
+						<view class='conter'>{{orderInfo.campusAppointmentDate}} {{formatAppointmentSlot(orderInfo.campusAppointmentSlot)}}</view>
 					</view>
 					<view class='item flex justify-between align-center' v-if="orderInfo.mark && orderInfo.mark.length <= 15">
 						<view>买家留言：</view>
@@ -264,10 +299,14 @@
 				</view>
 				<view style='height:120rpx;'></view>
 				<view class='footer acea-row row-right row-middle' v-if="isGoodsReturn==false">
-					<view class="qs-btn" v-if="!orderInfo.paid" @click.stop="cancelOrder">取消订单</view>
+					<view
+						class="qs-btn"
+						v-if="!orderInfo.paid || (orderInfo.shippingType === 3 && orderInfo.campusStatus === 10 && orderInfo.refundStatus === 0)"
+						@click.stop="cancelOrder"
+					>取消订单</view>
 					<view class='bnt bg_color' v-if="!orderInfo.paid" @tap='pay_open(orderInfo.orderId,orderInfo.payPrice)'>立即付款</view>
 					<navigator hover-class="none" :url="'/pages/goods/goods_return/index?orderId='+orderInfo.orderId"
-						class='bnt cancel' v-else-if="orderInfo.paid === true && orderInfo.refundStatus === 0 && orderInfo.type!==1">申请退款
+						class='bnt cancel' v-else-if="orderInfo.paid === true && orderInfo.refundStatus === 0 && orderInfo.type!==1 && !(orderInfo.shippingType === 3 && orderInfo.campusStatus === 10)">申请退款
 					</navigator>
 					<view class='bnt bg_color' v-if="orderInfo.combinationId > 0&&orderInfo.paid" @tap='goJoinPink'>查看拼团</view>
 					<navigator class='bnt cancel' v-if="orderInfo.deliveryType == 'express' && orderInfo.status >0"
@@ -408,6 +447,9 @@
 			// #endif
 		},
 		methods: {
+			formatAppointmentSlot(slot) {
+				return slot ? slot.replace(',', ' - ') : '';
+			},
 			wxChatService(){
 				let chatUrlArr = this.chatUrl.split('?')
 				uni.navigateTo({
@@ -447,6 +489,14 @@
 				uni.makePhoneCall({
 					phoneNumber: this.system_store.phone
 				})
+			},
+			callCampusStore: function() {
+				uni.makePhoneCall({
+					phoneNumber: this.orderInfo.systemStore.phone
+				})
+			},
+			callCampusDeliveryService: function() {
+				this.onClickService();
 			},
 			/**
 			 * 打开地图
@@ -762,6 +812,88 @@
 		}
 
 		/* #endif */
+	}
+	.campusTrack {
+		background: #fff;
+		margin-top: 15rpx;
+		padding: 28rpx 30rpx 10rpx;
+	}
+
+	.campusContact {
+		background: #fff;
+		margin-top: 15rpx;
+		padding: 28rpx 30rpx;
+	}
+
+	.campusContact .title {
+		color: #282828;
+		font-size: 30rpx;
+		font-weight: 600;
+		margin-bottom: 18rpx;
+	}
+
+	.contactItem + .contactItem {
+		border-top: 1rpx solid #f0f0f0;
+		margin-top: 18rpx;
+		padding-top: 18rpx;
+	}
+
+	.contactName {
+		color: #282828;
+		font-size: 26rpx;
+		line-height: 36rpx;
+	}
+
+	.contactHint {
+		color: #999;
+		font-size: 22rpx;
+		line-height: 32rpx;
+		margin-top: 4rpx;
+	}
+
+	.contactAction {
+		border: 1rpx solid currentColor;
+		border-radius: 28rpx;
+		flex: 0 0 auto;
+		font-size: 24rpx;
+		line-height: 54rpx;
+		margin-left: 18rpx;
+		min-width: 118rpx;
+		padding: 0 18rpx;
+		text-align: center;
+	}
+	.campusTrack .title {
+		color: #282828;
+		font-size: 30rpx;
+		font-weight: 600;
+		margin-bottom: 24rpx;
+	}
+	.trackItem {
+		display: flex;
+		padding-bottom: 24rpx;
+	}
+	.trackDot {
+		background: currentColor;
+		border-radius: 50%;
+		flex: 0 0 14rpx;
+		height: 14rpx;
+		margin: 12rpx 20rpx 0 0;
+		width: 14rpx;
+	}
+	.trackMain {
+		flex: 1;
+		min-width: 0;
+	}
+	.trackMsg {
+		color: #282828;
+		font-size: 27rpx;
+		line-height: 38rpx;
+	}
+	.trackTime {
+		color: #999;
+		font-size: 23rpx;
+		line-height: 32rpx;
+		margin-top: 4rpx;
 	}
 	.justify-between {
 		justify-content: space-between;

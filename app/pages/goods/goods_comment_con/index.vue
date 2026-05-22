@@ -70,6 +70,7 @@
 					}
 				],
 				orderId: '',
+				shippingType: 0,
 				productId: 0, //产品id
 				evaluateId: 0, //评价id
 				unique: '',
@@ -99,7 +100,12 @@
 			});
 			this.unique =  Number(options.unique) || 0;
 			this.orderId = options.orderId || 0;
+			this.shippingType = Number(options.shippingType || 0);
 			this.evaluateId = Number(options.id) || 0;
+			if (this.shippingType === 3) {
+				this.scoreList[0].name = '商家商品';
+				this.scoreList[1].name = '配送服务';
+			}
 			if (this.isLogin) {
 				this.getOrderProduct();
 			} else {

@@ -165,5 +165,14 @@ public class SystemStoreStaffServiceImpl extends ServiceImpl<SystemStoreStaffDao
         return updateById(systemStoreStaff);
     }
 
+    @Override
+    public SystemStoreStaff getEnabledByUid(Integer uid) {
+        LambdaQueryWrapper<SystemStoreStaff> wrapper = Wrappers.lambdaQuery();
+        wrapper.eq(SystemStoreStaff::getUid, uid);
+        wrapper.eq(SystemStoreStaff::getStatus, 1);
+        wrapper.last(" limit 1");
+        return dao.selectOne(wrapper);
+    }
+
 }
 

@@ -56,6 +56,13 @@ public interface StoreOrderStatusService extends IService<StoreOrderStatus> {
     List<StoreOrderStatus> getByEntity(StoreOrderStatus storeOrderStatus);
 
     /**
+     * 获取校园订单对学生可见的履约轨迹
+     * @param orderId 订单id
+     * @return 校园订单履约轨迹
+     */
+    List<StoreOrderStatus> getCampusStatusLogList(Integer orderId);
+
+    /**
      * 根据订单id获取最后一条记录
      * @param orderId 订单id
      * @return StoreOrderStatus

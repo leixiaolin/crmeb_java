@@ -46,4 +46,13 @@ public class StoreOrderSearchRequest implements Serializable {
     @NotNull(message = "订单类型不能为空")
     @Range(min = 0, max = 2, message = "未知的订单类型")
     private Integer type;
+
+    @ApiModelProperty(value = "是否仅查询校园配送订单")
+    private Boolean campusOnly;
+
+    @ApiModelProperty(value = "校园订单履约状态")
+    private Integer campusStatus;
+
+    @ApiModelProperty(value = "Sort campus delivery orders by address snapshot")
+    private Boolean campusDeliverySort;
 }

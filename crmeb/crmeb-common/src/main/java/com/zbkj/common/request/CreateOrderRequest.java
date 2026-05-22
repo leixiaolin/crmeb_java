@@ -46,6 +46,16 @@ public class CreateOrderRequest implements Serializable {
     @ApiModelProperty(value = "Campus address id")
     private Integer campusAddressId;
 
+    @ApiModelProperty(value = "Campus order cutlery count")
+    @Range(min = 0, max = 20, message = "Cutlery count must be between 0 and 20")
+    private Integer cutleryCount;
+
+    @ApiModelProperty(value = "Campus appointment date, yyyy-MM-dd")
+    private String campusAppointmentDate;
+
+    @ApiModelProperty(value = "Campus appointment delivery time slot")
+    private String campusAppointmentSlot;
+
     @ApiModelProperty(value = "优惠券编号")
     private Integer couponId;
 

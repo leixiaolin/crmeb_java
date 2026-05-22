@@ -23,6 +23,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.time.LocalTime;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -284,6 +286,31 @@ public class SystemStoreServiceImpl extends ServiceImpl<SystemStoreDao, SystemSt
         }
         systemStore.setLatitude(systemStore.getLatitude() + "," + systemStore.getLongitude());
         return systemStore;
+    }
+
+    @Override
+    public Boolean isOpenNow(SystemStore systemStore) {
+        if (ObjectUtil.isNull(systemStore) || StringUtils.isBlank(systemStore.getDayTime())) {
+            return false;
+        }
+        String[] dayTime = systemStore.getDayTime().split(",");
+        if (dayTime.length != 2) {
+            return false;
+        }
+        try {
+            LocalTime startTime = LocalTime.parse(dayTime[0]);
+            LocalTime endTime = LocalTime.parse(dayTime[1]);
+            LocalTime now = LocalTime.now();
+            if (startTime.equals(endTime)) {
+                return true;
+            }
+            if (startTime.isBefore(endTime)) {
+                return !now.isBefore(startTime) && !now.isAfter(endTime);
+            }
+            return !now.isBefore(startTime) || !now.isAfter(endTime);
+        } catch (DateTimeParseException exception) {
+            return false;
+        }
     }
 
     /**

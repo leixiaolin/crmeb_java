@@ -79,6 +79,9 @@ public class StoreOrderInfoResponse implements Serializable {
     @ApiModelProperty(value = "订单状态（-1 : 申请退款 -2 : 退货成功 0：待发货；1：待收货；2：已收货；3：待评价；-1：已退款）")
     private Integer status;
 
+    @ApiModelProperty(value = "校园订单状态：0待付款，10待接单，20配送中，-10已取消")
+    private Integer campusStatus;
+
     @ApiModelProperty(value = "0 未退款 1 申请中 2 已退款")
     private Integer refundStatus;
 
@@ -99,6 +102,15 @@ public class StoreOrderInfoResponse implements Serializable {
 
     @ApiModelProperty(value = "备注")
     private String mark;
+
+    @ApiModelProperty(value = "Campus order cutlery count")
+    private Integer cutleryCount;
+
+    @ApiModelProperty(value = "Campus order appointment date")
+    private String campusAppointmentDate;
+
+    @ApiModelProperty(value = "Campus order appointment delivery time slot")
+    private String campusAppointmentSlot;
 
     @ApiModelProperty(value = "是否删除")
     private Boolean isDel;

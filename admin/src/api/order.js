@@ -8,7 +8,7 @@
 // | Author: CRMEB Team <admin@crmeb.com>
 // +----------------------------------------------------------------------
 
-import request from '@/utils/request';
+import request from '@/utils/request'
 
 /**
  * 订单 列表
@@ -18,8 +18,8 @@ export function orderListApi(params) {
   return request({
     url: '/admin/store/order/list',
     method: 'get',
-    params,
-  });
+    params
+  })
 }
 
 /**
@@ -30,8 +30,8 @@ export function orderStatusNumApi(params) {
   return request({
     url: '/admin/store/order/status/num',
     method: 'get',
-    params,
-  });
+    params
+  })
 }
 
 /**
@@ -42,8 +42,8 @@ export function orderListDataApi(params) {
   return request({
     url: '/admin/store/order/list/data',
     method: 'get',
-    params,
-  });
+    params
+  })
 }
 /**
  * 订单 删除
@@ -53,8 +53,8 @@ export function orderDeleteApi(params) {
   return request({
     url: '/admin/store/order/delete',
     method: 'get',
-    params,
-  });
+    params
+  })
 }
 
 /**
@@ -66,8 +66,8 @@ export function orderUpdateApi(data, params) {
     url: '/admin/store/order/update',
     method: 'post',
     data,
-    params,
-  });
+    params
+  })
 }
 
 /**
@@ -78,8 +78,8 @@ export function orderLogApi(params) {
   return request({
     url: '/admin/store/order/status/list',
     method: 'get',
-    params,
-  });
+    params
+  })
 }
 
 /**
@@ -90,8 +90,8 @@ export function orderDetailApi(params) {
   return request({
     url: '/admin/store/order/info',
     method: 'get',
-    params,
-  });
+    params
+  })
 }
 
 /**
@@ -102,8 +102,8 @@ export function orderMarkApi(params) {
   return request({
     url: '/admin/store/order/mark',
     method: 'post',
-    params,
-  });
+    params
+  })
 }
 
 /**
@@ -114,8 +114,16 @@ export function orderSendApi(data) {
   return request({
     url: '/admin/store/order/send',
     method: 'post',
-    data,
-  });
+    data
+  })
+}
+
+export function campusOrderDeliveredApi(params) {
+  return request({
+    url: '/admin/store/order/campus/delivered',
+    method: 'post',
+    params
+  })
 }
 
 /**
@@ -126,8 +134,8 @@ export function orderRefuseApi(params) {
   return request({
     url: '/admin/store/order/refund/refuse',
     method: 'get',
-    params,
-  });
+    params
+  })
 }
 
 /**
@@ -138,8 +146,8 @@ export function orderRefundApi(params) {
   return request({
     url: '/admin/store/order/refund',
     method: 'get',
-    params,
-  });
+    params
+  })
 }
 
 /**
@@ -149,8 +157,8 @@ export function orderRefundApi(params) {
 export function writeUpdateApi(vCode) {
   return request({
     url: `/admin/store/order/writeUpdate/${vCode}`,
-    method: 'get',
-  });
+    method: 'get'
+  })
 }
 
 /**
@@ -160,8 +168,8 @@ export function writeUpdateApi(vCode) {
 export function writeConfirmApi(vCode) {
   return request({
     url: `/admin/store/order/writeConfirm/${vCode}`,
-    method: 'get',
-  });
+    method: 'get'
+  })
 }
 
 /**
@@ -170,8 +178,8 @@ export function writeConfirmApi(vCode) {
 export function orderStatisticsApi() {
   return request({
     url: `/admin/store/order/statistics`,
-    method: 'get',
-  });
+    method: 'get'
+  })
 }
 
 /**
@@ -181,8 +189,8 @@ export function statisticsDataApi(params) {
   return request({
     url: `/admin/store/order/statisticsData`,
     method: 'get',
-    params,
-  });
+    params
+  })
 }
 
 /**
@@ -192,8 +200,8 @@ export function updatePriceApi(data) {
   return request({
     url: `admin/store/order/update/price`,
     method: 'post',
-    data,
-  });
+    data
+  })
 }
 
 /**
@@ -203,8 +211,8 @@ export function orderTimeApi(params) {
   return request({
     url: `/admin/store/order/time`,
     method: 'get',
-    params,
-  });
+    params
+  })
 }
 
 /**
@@ -213,8 +221,8 @@ export function orderTimeApi(params) {
 export function sheetInfoApi() {
   return request({
     url: `/admin/store/order/sheet/info`,
-    method: 'get',
-  });
+    method: 'get'
+  })
 }
 
 /**
@@ -224,8 +232,8 @@ export function getLogisticsInfoApi(params) {
   return request({
     url: `/admin/store/order/getLogisticsInfo`,
     method: 'get',
-    params,
-  });
+    params
+  })
 }
 
 /**
@@ -234,8 +242,8 @@ export function getLogisticsInfoApi(params) {
 export function companyGetListApi() {
   return request({
     url: `/admin/pay/component/delivery/company/get/list`,
-    method: 'get',
-  });
+    method: 'get'
+  })
 }
 
 /**
@@ -245,8 +253,8 @@ export function videoSendApi(data) {
   return request({
     url: `/admin/store/order/video/send`,
     method: 'post',
-    data,
-  });
+    data
+  })
 }
 
 /**
@@ -255,8 +263,8 @@ export function videoSendApi(data) {
 export function orderPrint(id) {
   return request({
     url: `/admin/yly/print/${id}`,
-    method: 'get',
-  });
+    method: 'get'
+  })
 }
 
 /**
@@ -266,6 +274,6 @@ export function updateTrackingNumberApi(data) {
   return request({
     url: `/admin/store/order/update/tracking/number`,
     method: 'post',
-    data,
-  });
+    data
+  })
 }

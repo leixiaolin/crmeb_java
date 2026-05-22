@@ -43,6 +43,9 @@ public class SystemStore implements Serializable {
     @ApiModelProperty(value = "简介")
     private String introduction;
 
+    @ApiModelProperty(value = "Store announcement")
+    private String notice;
+
     @ApiModelProperty(value = "手机号码")
     private String phone;
 

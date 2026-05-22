@@ -99,6 +99,14 @@
                   <div class="lang">商品总数：</div>
                   <div class="value">{{ orderDatalist.totalNum }}</div>
                 </li>
+                <li v-if="orderDatalist.shippingType === 3" class="item">
+                  <div class="lang">餐具份数：</div>
+                  <div class="value">{{ orderDatalist.cutleryCount ? `${orderDatalist.cutleryCount}份` : '无需餐具' }}</div>
+                </li>
+                <li v-if="orderDatalist.shippingType === 3 && orderDatalist.campusAppointmentDate" class="item">
+                  <div class="lang">预约配送：</div>
+                  <div class="value">{{ orderDatalist.campusAppointmentDate }} {{ formatAppointmentSlot(orderDatalist.campusAppointmentSlot) }}</div>
+                </li>
                 <li class="item">
                   <div class="lang">优惠券：</div>
                   <div class="value">{{ orderDatalist.couponPrice }}</div>
@@ -253,7 +261,7 @@
                         </a>
                       </div>
                     </template>
-                    <template v-if="orderDatalist.deliveryType === 'noNeed'" slot-scope="scope">
+                    <template v-if="orderDatalist.deliveryType === 'noNeed'">
                       <div class="acea-row row-middle">
                         <div class="font12 color-text">发货备注：{{ orderDatalist.deliveryMark }}</div>
                       </div>
@@ -333,6 +341,9 @@ export default {
     }
   },
   methods: {
+    formatAppointmentSlot(slot) {
+      return slot ? slot.replace(',', ' - ') : ''
+    },
     checkPermi,
     // 修改物流信息
     handleEditLogistics(row) {

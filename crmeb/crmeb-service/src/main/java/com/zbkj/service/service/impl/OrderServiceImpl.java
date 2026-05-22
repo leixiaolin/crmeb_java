@@ -57,6 +57,8 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -104,6 +106,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private CampusDeliveryService campusDeliveryService;
+
+    @Autowired
+    private CampusStoreRangeService campusStoreRangeService;
 
     @Autowired
     private SystemConfigService systemConfigService;
@@ -276,9 +281,18 @@ public class OrderServiceImpl implements OrderService {
 
         //已收货，待评价
         storeOrder.setStatus(Constants.ORDER_STATUS_INT_BARGAIN);
+        if (storeOrder.getShippingType().equals(3)
+                && Objects.equals(Constants.CAMPUS_ORDER_STATUS_DELIVERED, storeOrder.getCampusStatus())) {
+            storeOrder.setCampusStatus(Constants.CAMPUS_ORDER_STATUS_COMPLETED);
+        }
         storeOrder.setUpdateTime(DateUtil.date());
         boolean result = storeOrderService.updateById(storeOrder);
         if (result) {
+            if (storeOrder.getShippingType().equals(3)
+                    && Objects.equals(Constants.CAMPUS_ORDER_STATUS_COMPLETED, storeOrder.getCampusStatus())) {
+                storeOrderStatusService.createLog(storeOrder.getId(), Constants.ORDER_LOG_CAMPUS_COMPLETED,
+                        Constants.ORDER_LOG_MESSAGE_CAMPUS_COMPLETED);
+            }
             //后续操作放入redis
             redisUtil.lPush(TaskConstants.ORDER_TASK_REDIS_KEY_AFTER_TAKE_BY_USER, id);
         }
@@ -293,6 +307,31 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Boolean cancel(Integer id) {
         StoreOrder storeOrder = orderUtils.getInfoById(id);
+        if (storeOrder.getPaid()) {
+            if (!storeOrder.getShippingType().equals(3)
+                    || !Objects.equals(Constants.CAMPUS_ORDER_STATUS_PENDING_ACCEPT, storeOrder.getCampusStatus())) {
+                throw new CrmebException("Paid order cannot be canceled");
+            }
+            if (!storeOrder.getRefundStatus().equals(0)) {
+                throw new CrmebException("Campus order refund is already processing");
+            }
+            StoreOrderRefundRequest refundRequest = new StoreOrderRefundRequest();
+            refundRequest.setOrderNo(storeOrder.getOrderId());
+            refundRequest.setAmount(storeOrder.getPayPrice());
+            if (!storeOrderService.refund(refundRequest)) {
+                return Boolean.FALSE;
+            }
+            StoreOrder campusCancelUpdate = new StoreOrder();
+            campusCancelUpdate.setId(storeOrder.getId());
+            campusCancelUpdate.setCampusStatus(Constants.CAMPUS_ORDER_STATUS_CANCELED);
+            campusCancelUpdate.setUpdateTime(DateUtil.date());
+            boolean cancelResult = storeOrderService.updateById(campusCancelUpdate);
+            if (cancelResult) {
+                storeOrderStatusService.createLog(storeOrder.getId(), Constants.ORDER_LOG_CAMPUS_CANCEL,
+                        Constants.ORDER_LOG_MESSAGE_CAMPUS_CANCEL);
+            }
+            return cancelResult;
+        }
         //已收货，待评价
         storeOrder.setIsDel(true);
         storeOrder.setIsSystemDel(true);
@@ -317,6 +356,10 @@ public class OrderServiceImpl implements OrderService {
         storeOrderPram.setPaid(true);
         StoreOrder existStoreOrder = storeOrderService.getByEntityOne(storeOrderPram);
         if (null == existStoreOrder) throw new CrmebException("支付订单不存在");
+        if (existStoreOrder.getShippingType().equals(3)
+                && Objects.equals(Constants.CAMPUS_ORDER_STATUS_PENDING_ACCEPT, existStoreOrder.getCampusStatus())) {
+            throw new CrmebException("待接单校园订单请先取消订单");
+        }
         if (existStoreOrder.getRefundStatus() == 1) {
             throw new CrmebException("正在申请退款中");
         }
@@ -329,11 +372,23 @@ public class OrderServiceImpl implements OrderService {
             throw new CrmebException("订单退款中");
         }
 
+        BigDecimal refundApplyPrice = ObjectUtil.isNotNull(request.getAmount())
+                ? request.getAmount() : existStoreOrder.getPayPrice();
+        if (refundApplyPrice.compareTo(existStoreOrder.getPayPrice()) > 0) {
+            throw new CrmebException("申请退款金额不能大于支付金额");
+        }
+        if (existStoreOrder.getPayPrice().compareTo(BigDecimal.ZERO) > 0
+                && refundApplyPrice.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new CrmebException("申请退款金额必须大于0");
+        }
+
         existStoreOrder.setRefundStatus(1);
         existStoreOrder.setRefundReasonTime(CrmebDateUtil.nowDateTime());
         existStoreOrder.setRefundReasonWap(request.getText());
         existStoreOrder.setRefundReasonWapExplain(request.getExplain());
         existStoreOrder.setRefundReasonWapImg(systemAttachmentService.clearPrefix(request.getReasonImage()));
+        existStoreOrder.setRefundReason("");
+        existStoreOrder.setRefundApplyPrice(refundApplyPrice);
         existStoreOrder.setRefundPrice(BigDecimal.ZERO);
 
         existStoreOrder.setUpdateTime(DateUtil.date());
@@ -509,6 +564,20 @@ public class OrderServiceImpl implements OrderService {
         if (storeOrder.getRefundStatus().equals(3)) {
             return "退款中";
         }
+        if (storeOrder.getShippingType().equals(3)) {
+            if (Objects.equals(Constants.CAMPUS_ORDER_STATUS_PENDING_ACCEPT, storeOrder.getCampusStatus())) {
+                return "待接单";
+            }
+            if (Objects.equals(Constants.CAMPUS_ORDER_STATUS_DELIVERING, storeOrder.getCampusStatus())) {
+                return "配送中";
+            }
+            if (Objects.equals(Constants.CAMPUS_ORDER_STATUS_DELIVERED, storeOrder.getCampusStatus())) {
+                return "已送达";
+            }
+            if (Objects.equals(Constants.CAMPUS_ORDER_STATUS_CANCELED, storeOrder.getCampusStatus())) {
+                return "已取消";
+            }
+        }
         if (storeOrder.getStatus().equals(0)) {
             return "待发货";
         }
@@ -561,10 +630,14 @@ public class OrderServiceImpl implements OrderService {
             infoResponseList.add(orderInfoResponse);
         });
         storeOrderDetailResponse.setOrderInfoList(infoResponseList);
+        if (storeOrder.getShippingType().equals(3)) {
+            storeOrderDetailResponse.setCampusStatusLogList(storeOrderStatusService.getCampusStatusLogList(storeOrder.getId()));
+        }
 
         // 系统门店信息
         SystemStore systemStorePram = new SystemStore();
-        systemStorePram.setId(storeOrder.getStoreId());
+        Integer systemStoreId = storeOrder.getShippingType().equals(3) ? storeOrder.getMerId() : storeOrder.getStoreId();
+        systemStorePram.setId(systemStoreId);
         storeOrderDetailResponse.setSystemStore(systemStoreService.getByCondition(systemStorePram));
         // 腾讯云地图key
         BeanUtils.copyProperties(storeOrder, storeOrderDetailResponse);
@@ -608,6 +681,26 @@ public class OrderServiceImpl implements OrderService {
             record.set("type", -3);
             record.set("title", "退款中");
             record.set("msg", "正在为您退款,感谢您的支持");
+        } else if (storeOrder.getShippingType().equals(3)
+                && Objects.equals(Constants.CAMPUS_ORDER_STATUS_PENDING_ACCEPT, storeOrder.getCampusStatus())) {
+            record.set("type", Constants.CAMPUS_ORDER_STATUS_PENDING_ACCEPT);
+            record.set("title", "待接单");
+            record.set("msg", "已支付，等待商家接单");
+        } else if (storeOrder.getShippingType().equals(3)
+                && Objects.equals(Constants.CAMPUS_ORDER_STATUS_DELIVERING, storeOrder.getCampusStatus())) {
+            record.set("type", Constants.CAMPUS_ORDER_STATUS_DELIVERING);
+            record.set("title", "配送中");
+            record.set("msg", "商家已接单，订单配送中");
+        } else if (storeOrder.getShippingType().equals(3)
+                && Objects.equals(Constants.CAMPUS_ORDER_STATUS_DELIVERED, storeOrder.getCampusStatus())) {
+            record.set("type", Constants.CAMPUS_ORDER_STATUS_DELIVERED);
+            record.set("title", "已送达");
+            record.set("msg", "订单已送达，请确认收货");
+        } else if (storeOrder.getShippingType().equals(3)
+                && Objects.equals(Constants.CAMPUS_ORDER_STATUS_CANCELED, storeOrder.getCampusStatus())) {
+            record.set("type", Constants.CAMPUS_ORDER_STATUS_CANCELED);
+            record.set("title", "已取消");
+            record.set("msg", "校园订单已取消");
         } else if (storeOrder.getStatus() == 0) {
             record.set("type", 1);
             record.set("title", "未发货");
@@ -961,6 +1054,7 @@ public class OrderServiceImpl implements OrderService {
         // 校验收货信息
         String verifyCode = "";
         String userAddressStr = "";
+        CampusAddress campusAddressSnapshot = null;
         if (request.getShippingType() == 1) { // 快递配送
             if (request.getAddressId() <= 0) throw new CrmebException("请选择收货地址");
             UserAddress userAddress = userAddressService.getById(request.getAddressId());
@@ -990,6 +1084,9 @@ public class OrderServiceImpl implements OrderService {
                 throw new CrmebException("Please select campus address");
             }
             CampusAddress campusAddress = campusAddressService.getDetail(request.getCampusAddressId());
+            campusAddressSnapshot = campusAddress;
+            validateCampusStore(orderInfoVo, campusAddress.getSchoolId());
+            validateCampusAppointment(request, orderInfoVo);
             request.setRealName(campusAddress.getContactName());
             request.setPhone(campusAddress.getContactPhone());
             userAddressStr = campusAddress.getSchoolName() + campusAddress.getCampusName()
@@ -1082,6 +1179,13 @@ public class OrderServiceImpl implements OrderService {
         storeOrder.setRealName(request.getRealName());
         storeOrder.setUserPhone(request.getPhone());
         storeOrder.setUserAddress(userAddressStr);
+        if (ObjectUtil.isNotNull(campusAddressSnapshot)) {
+            storeOrder.setCampusSchoolName(campusAddressSnapshot.getSchoolName());
+            storeOrder.setCampusName(campusAddressSnapshot.getCampusName());
+            storeOrder.setCampusBuildingName(campusAddressSnapshot.getBuildingName());
+            storeOrder.setCampusFloorNo(campusAddressSnapshot.getFloorNo());
+            storeOrder.setCampusRoomNo(campusAddressSnapshot.getRoomNo());
+        }
         // 如果是自提
         if (request.getShippingType() == 2) {
             storeOrder.setVerifyCode(verifyCode);
@@ -1104,6 +1208,15 @@ public class OrderServiceImpl implements OrderService {
         storeOrder.setUseIntegral(computedOrderPriceResponse.getUsedIntegral());
         storeOrder.setGainIntegral(gainIntegral);
         storeOrder.setMark(StringEscapeUtils.escapeHtml4(request.getMark()));
+        storeOrder.setCutleryCount(request.getShippingType() == 3 ? ObjectUtil.defaultIfNull(request.getCutleryCount(), 0) : 0);
+        if (request.getShippingType() == 3) {
+            storeOrder.setCampusAppointmentDate(request.getCampusAppointmentDate());
+            storeOrder.setCampusAppointmentSlot(request.getCampusAppointmentSlot());
+        }
+        if (request.getShippingType() == 3) {
+            storeOrder.setMerId(orderInfoVo.getCampusStoreId());
+            storeOrder.setCampusStatus(Constants.CAMPUS_ORDER_STATUS_UNPAID);
+        }
         storeOrder.setCombinationId(orderInfoVo.getCombinationId());
         storeOrder.setPinkId(orderInfoVo.getPinkId());
         storeOrder.setSeckillId(orderInfoVo.getSeckillId());
@@ -1358,6 +1471,60 @@ public class OrderServiceImpl implements OrderService {
     }
 
 
+    private void validateCampusStore(OrderInfoVo orderInfoVo, Integer schoolId) {
+        Integer campusStoreId = null;
+        for (OrderInfoDetailVo detailVo : orderInfoVo.getOrderDetailList()) {
+            StoreProduct storeProduct = storeProductService.getById(detailVo.getProductId());
+            if (ObjectUtil.isNull(storeProduct) || ObjectUtil.isNull(storeProduct.getMerId()) || storeProduct.getMerId() <= 0) {
+                throw new CrmebException("Campus delivery only supports campus store products");
+            }
+            if (ObjectUtil.isNull(campusStoreId)) {
+                campusStoreId = storeProduct.getMerId();
+            } else if (!campusStoreId.equals(storeProduct.getMerId())) {
+                throw new CrmebException("Campus order only supports products from one store");
+            }
+        }
+        SystemStore systemStore = systemStoreService.getById(campusStoreId);
+        if (ObjectUtil.isNull(systemStore) || systemStore.getIsDel() || !systemStore.getIsShow()) {
+            throw new CrmebException("Campus store is unavailable");
+        }
+        if (!systemStoreService.isOpenNow(systemStore)) {
+            throw new CrmebException("Campus store is closed");
+        }
+        if (!campusStoreRangeService.isEnabled(schoolId, campusStoreId)) {
+            throw new CrmebException("Campus store does not serve this school");
+        }
+    }
+
+    private void validateCampusAppointment(CreateOrderRequest request, OrderInfoVo orderInfoVo) {
+        if (StringUtils.isBlank(request.getCampusAppointmentDate())) {
+            throw new CrmebException("Please select campus appointment date");
+        }
+        if (StringUtils.isBlank(request.getCampusAppointmentSlot())) {
+            throw new CrmebException("Please select campus appointment time slot");
+        }
+        LocalDate appointmentDate;
+        try {
+            appointmentDate = LocalDate.parse(request.getCampusAppointmentDate().trim());
+        } catch (DateTimeParseException exception) {
+            throw new CrmebException("Campus appointment date is invalid");
+        }
+        if (appointmentDate.isBefore(LocalDate.now())) {
+            throw new CrmebException("Campus appointment date is unavailable");
+        }
+        SystemStore campusStore = ObjectUtil.isNull(orderInfoVo.getCampusStoreId())
+                ? null : systemStoreService.getById(orderInfoVo.getCampusStoreId());
+        if (ObjectUtil.isNull(campusStore) || StringUtils.isBlank(campusStore.getDayTime())) {
+            throw new CrmebException("Campus appointment time slot is unavailable");
+        }
+        String appointmentSlot = request.getCampusAppointmentSlot().trim();
+        if (!campusStore.getDayTime().equals(appointmentSlot)) {
+            throw new CrmebException("Campus appointment time slot is unavailable");
+        }
+        request.setCampusAppointmentDate(appointmentDate.toString());
+        request.setCampusAppointmentSlot(appointmentSlot);
+    }
+
     /**
      * 校验预下单商品信息
      *
@@ -1450,7 +1617,34 @@ public class OrderServiceImpl implements OrderService {
             detailVoList = validatePreOrderAgain(detailRequest, user);
         }
         orderInfoVo.setOrderDetailList(detailVoList);
+        orderInfoVo.setCampusStoreId(getCampusStoreId(detailVoList));
+        if (ObjectUtil.isNotNull(orderInfoVo.getCampusStoreId())) {
+            SystemStore campusStore = systemStoreService.getById(orderInfoVo.getCampusStoreId());
+            if (ObjectUtil.isNotNull(campusStore)) {
+                orderInfoVo.setCampusStoreDayTime(campusStore.getDayTime());
+            }
+        }
         return orderInfoVo;
+    }
+
+    private Integer getCampusStoreId(List<OrderInfoDetailVo> detailVoList) {
+        if (CollUtil.isEmpty(detailVoList)) {
+            return null;
+        }
+        Integer campusStoreId = null;
+        for (OrderInfoDetailVo detailVo : detailVoList) {
+            StoreProduct storeProduct = storeProductService.getById(detailVo.getProductId());
+            Integer merId = ObjectUtil.isNull(storeProduct) ? null : storeProduct.getMerId();
+            if (ObjectUtil.isNull(merId) || merId <= 0) {
+                return null;
+            }
+            if (ObjectUtil.isNull(campusStoreId)) {
+                campusStoreId = merId;
+            } else if (!campusStoreId.equals(merId)) {
+                return null;
+            }
+        }
+        return campusStoreRangeService.hasEnabledRange(campusStoreId) ? campusStoreId : null;
     }
 
     /**
@@ -2102,6 +2296,8 @@ public class OrderServiceImpl implements OrderService {
     private ComputedOrderPriceResponse computedPrice(OrderComputedPriceRequest request, OrderInfoVo orderInfoVo, User user) {
         // 计算各种价格
         ComputedOrderPriceResponse priceResponse = new ComputedOrderPriceResponse();
+        priceResponse.setCampusFloorDeliveryFee(BigDecimal.ZERO);
+        priceResponse.setCampusRainFee(BigDecimal.ZERO);
         // 计算运费
         if (request.getShippingType().equals(2)) {// 到店自提，不计算运费
             priceResponse.setFreightFee(BigDecimal.ZERO);
@@ -2110,10 +2306,13 @@ public class OrderServiceImpl implements OrderService {
                 priceResponse.setFreightFee(BigDecimal.ZERO);
             } else {
                 CampusAddress campusAddress = campusAddressService.getDetail(request.getCampusAddressId());
+                validateCampusStore(orderInfoVo, campusAddress.getSchoolId());
                 CampusDeliveryQuoteResponse quote = campusDeliveryService.quote(campusAddress.getBuildingId(), campusAddress.getFloorNo());
                 if (orderInfoVo.getProTotalFee().compareTo(quote.getStartPrice()) < 0) {
                     throw new CrmebException("Campus order does not meet start price");
                 }
+                priceResponse.setCampusFloorDeliveryFee(quote.getFloorDeliveryFee());
+                priceResponse.setCampusRainFee(quote.getRainFee());
                 priceResponse.setFreightFee(quote.getDeliveryFee());
             }
         } else if (ObjectUtil.isNull(request.getAddressId()) || request.getAddressId() <= 0) {

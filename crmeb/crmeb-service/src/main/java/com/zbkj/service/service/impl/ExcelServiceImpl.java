@@ -1,6 +1,8 @@
 package com.zbkj.service.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import com.zbkj.common.config.CrmebConfig;
 import com.zbkj.common.constants.UploadConstants;
 import com.zbkj.common.page.CommonPage;
@@ -247,6 +249,9 @@ public class ExcelServiceImpl implements ExcelService {
             vo.setProductName(order.getProductList().stream().map(item-> item.getInfo().getProductName()).collect(Collectors.joining(",")));
             vo.setRealName(order.getRealName());
             vo.setStatusStr(order.getStatusStr().get("value"));
+            vo.setCampusStatus(getCampusStatusText(order.getCampusStatus()));
+            vo.setCampusAddress(getCampusAddress(order));
+            vo.setCampusAppointment(getCampusAppointment(order));
             voList.add(vo);
         }
 
@@ -283,12 +288,59 @@ public class ExcelServiceImpl implements ExcelService {
         aliasMap.put("orderType", "订单类型");
 //        aliasMap.put("remark", "订单管理员备注");
         aliasMap.put("realName", "用户姓名");
+        aliasMap.put("campusStatus", "校园履约状态");
+        aliasMap.put("campusAddress", "校园配送地址");
+        aliasMap.put("campusAppointment", "校园预约配送");
 //        aliasMap.put("paid", "支付状态");
 //        aliasMap.put("type", "订单类型:0-普通订单，1-视频号订单");
 //        aliasMap.put("isAlterPrice", "是否改价,0-否，1-是");
 
         return ExportUtil.exportExecl(fileName, "订单导出", voList, aliasMap);
 
+    }
+
+    private String getCampusAddress(StoreOrderDetailResponse order) {
+        if (StrUtil.isBlank(order.getCampusSchoolName()) && StrUtil.isBlank(order.getCampusBuildingName())) {
+            return "";
+        }
+        String floor = ObjectUtil.isNull(order.getCampusFloorNo()) || order.getCampusFloorNo() <= 0
+                ? "" : order.getCampusFloorNo() + "层";
+        return StrUtil.nullToEmpty(order.getCampusSchoolName())
+                + StrUtil.nullToEmpty(order.getCampusName())
+                + StrUtil.nullToEmpty(order.getCampusBuildingName())
+                + floor
+                + StrUtil.nullToEmpty(order.getCampusRoomNo());
+    }
+
+    private String getCampusAppointment(StoreOrderDetailResponse order) {
+        if (StrUtil.isBlank(order.getCampusAppointmentDate()) && StrUtil.isBlank(order.getCampusAppointmentSlot())) {
+            return "";
+        }
+        return StrUtil.nullToEmpty(order.getCampusAppointmentDate())
+                + " "
+                + StrUtil.nullToEmpty(order.getCampusAppointmentSlot()).replace(",", " - ");
+    }
+
+    private String getCampusStatusText(Integer campusStatus) {
+        if (ObjectUtil.isNull(campusStatus)) {
+            return "";
+        }
+        switch (campusStatus) {
+            case 0:
+                return "待付款";
+            case 10:
+                return "待接单";
+            case 20:
+                return "配送中";
+            case 30:
+                return "已送达";
+            case 40:
+                return "已完成";
+            case -10:
+                return "已取消";
+            default:
+                return campusStatus.toString();
+        }
     }
 }
 

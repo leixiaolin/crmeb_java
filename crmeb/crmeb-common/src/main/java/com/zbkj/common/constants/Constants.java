@@ -410,6 +410,13 @@ public class Constants {
     public static final int ORDER_STATUS_INT_BARGAIN = 2; //已收货，待评价
     public static final int ORDER_STATUS_INT_COMPLETE = 3; //已完成
 
+    public static final int CAMPUS_ORDER_STATUS_UNPAID = 0; //校园订单待付款
+    public static final int CAMPUS_ORDER_STATUS_PENDING_ACCEPT = 10; //校园订单待接单
+    public static final int CAMPUS_ORDER_STATUS_DELIVERING = 20; //校园订单配送中
+    public static final int CAMPUS_ORDER_STATUS_DELIVERED = 30; //校园订单已送达
+    public static final int CAMPUS_ORDER_STATUS_COMPLETED = 40; //校园订单已完成
+    public static final int CAMPUS_ORDER_STATUS_CANCELED = -10; //校园订单已取消
+
 
     //订单操作redis队列
     public static final String ORDER_TASK_REDIS_KEY_AFTER_DELETE_BY_USER = "alterOrderDeleteByUser"; // 用户删除订单后续操作
@@ -461,6 +468,11 @@ public class Constants {
     public static final String ORDER_LOG_DELIVERY_VI = "delivery_fictitious"; //虚拟发货
     public static final String ORDER_LOG_EDIT = "order_edit"; //编辑订单
     public static final String ORDER_LOG_PAY_OFFLINE = "offline"; //线下付款订单
+    public static final String ORDER_LOG_CAMPUS_ACCEPT = "campus_accept"; //校园商家接单
+    public static final String ORDER_LOG_CAMPUS_REJECT = "campus_reject"; //校园商家拒单
+    public static final String ORDER_LOG_CAMPUS_DELIVERED = "campus_delivered"; //校园订单送达
+    public static final String ORDER_LOG_CAMPUS_COMPLETED = "campus_completed"; //校园订单完成
+    public static final String ORDER_LOG_CAMPUS_CANCEL = "campus_cancel"; //学生取消校园订单
 
 
     // 订单缓存
@@ -474,6 +486,11 @@ public class Constants {
     public static final String ORDER_LOG_MESSAGE_DELIVERY_FICTITIOUS = "已虚拟发货"; //已虚拟发货
     public static final String ORDER_LOG_MESSAGE_REFUND_REFUSE = "不退款款因：{reason}"; //不退款款因
     public static final String ORDER_LOG_MESSAGE_PAY_SUCCESS = "用户付款成功"; //用户付款成功
+    public static final String ORDER_LOG_MESSAGE_CAMPUS_ACCEPT = "校园商家已接单"; //校园商家接单
+    public static final String ORDER_LOG_MESSAGE_CAMPUS_REJECT = "校园商家拒单并发起退款"; //校园商家拒单
+    public static final String ORDER_LOG_MESSAGE_CAMPUS_DELIVERED = "平台已标记校园订单送达"; //校园订单送达
+    public static final String ORDER_LOG_MESSAGE_CAMPUS_COMPLETED = "学生已确认校园订单送达"; //校园订单完成
+    public static final String ORDER_LOG_MESSAGE_CAMPUS_CANCEL = "学生接单前取消校园订单并发起退款"; //学生取消校园订单
 
     public static final String ORDER_NO_PREFIX_WE_CHAT = "wx"; //微信平台下单订单号前缀
     public static final String ORDER_NO_PREFIX_H5 = "h5"; //微信平台下单订单号前缀

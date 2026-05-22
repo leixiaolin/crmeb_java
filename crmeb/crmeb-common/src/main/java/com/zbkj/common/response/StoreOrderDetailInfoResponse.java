@@ -1,5 +1,6 @@
 package com.zbkj.common.response;
 
+import com.zbkj.common.model.order.StoreOrderStatus;
 import com.zbkj.common.model.system.SystemStore;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -92,6 +93,9 @@ public class StoreOrderDetailInfoResponse implements Serializable {
     @ApiModelProperty(value = "订单状态（0：待发货；1：待收货；2：已收货，待评价；3：已完成；）")
     private Integer status;
 
+    @ApiModelProperty(value = "校园订单状态：0待付款，10待接单，20配送中，30已送达，40已完成，-10已取消")
+    private Integer campusStatus;
+
     @ApiModelProperty(value = "0 未退款 1 申请中 2 已退款")
     private Integer refundStatus;
 
@@ -113,6 +117,9 @@ public class StoreOrderDetailInfoResponse implements Serializable {
     @ApiModelProperty(value = "退款金额")
     private BigDecimal refundPrice;
 
+    @ApiModelProperty(value = "申请退款金额")
+    private BigDecimal refundApplyPrice;
+
     @ApiModelProperty(value = "快递名称/送货人姓名")
     private String deliveryName;
 
@@ -133,6 +140,15 @@ public class StoreOrderDetailInfoResponse implements Serializable {
 
     @ApiModelProperty(value = "备注")
     private String mark;
+
+    @ApiModelProperty(value = "校园订单餐具份数")
+    private Integer cutleryCount;
+
+    @ApiModelProperty(value = "校园订单预约日期")
+    private String campusAppointmentDate;
+
+    @ApiModelProperty(value = "校园订单预约配送时段")
+    private String campusAppointmentSlot;
 
 //    @ApiModelProperty(value = "是否删除")
 //    private Boolean isDel;
@@ -202,6 +218,9 @@ public class StoreOrderDetailInfoResponse implements Serializable {
     private String statusPic;
     @ApiModelProperty(value = "订单详情")
     private List<OrderInfoResponse> orderInfoList;
+
+    @ApiModelProperty(value = "校园订单履约轨迹")
+    private List<StoreOrderStatus> campusStatusLogList;
 
 //    @ApiModelProperty(value = "订单ID")
 //    private Integer id;

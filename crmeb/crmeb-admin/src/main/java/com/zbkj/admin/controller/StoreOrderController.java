@@ -143,6 +143,13 @@ public class StoreOrderController {
          return CommonResult.success(storeOrderService.send(request));
     }
 
+    @PreAuthorize("hasAuthority('admin:campus:order:delivery:update')")
+    @ApiOperation(value = "Mark campus order delivered")
+    @RequestMapping(value = "/campus/delivered", method = RequestMethod.POST)
+    public CommonResult<Boolean> markCampusDelivered(@RequestParam String orderNo) {
+        return CommonResult.success(storeOrderService.markCampusDelivered(orderNo));
+    }
+
     /**
      * 退款
      */

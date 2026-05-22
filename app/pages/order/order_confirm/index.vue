@@ -96,7 +96,7 @@
 						<view class='discount'>-￥{{priceGroup.vipPrice}}</view>
 					</view> -->
 					<view class='item acea-row row-between-wrapper' v-if='shippingType!=1'>
-						<view>快递费用</view>
+						<view>{{shippingType == 2 ? '配送费用' : '快递费用'}}</view>
 						<view class='discount' v-if='parseFloat(orderInfoVo.freightFee) > 0'>
 							+￥{{orderInfoVo.freightFee}}
 						</view>
@@ -117,6 +117,24 @@
 									placeholder-class="placeholder" @blur='phone' maxlength="11"></input>
 							</view>
 						</view>
+					</view>
+					<view class='item acea-row row-between-wrapper' v-if="shippingType==2">
+						<view>餐具份数</view>
+						<view class="cutlery-stepper acea-row row-middle">
+							<view class="cutlery-button" :class="{ disabled: cutleryCount <= 0 }" @tap="changeCutlery(-1)">-</view>
+							<view class="cutlery-count">{{cutleryCount ? cutleryCount + '份' : '无需餐具'}}</view>
+							<view class="cutlery-button" :class="{ disabled: cutleryCount >= 20 }" @tap="changeCutlery(1)">+</view>
+						</view>
+					</view>
+					<view class='item acea-row row-between-wrapper' v-if="shippingType==2">
+						<view>预约日期</view>
+						<picker mode="date" :value="campusAppointmentDate" :start="campusAppointmentDateStart" @change="changeCampusAppointmentDate">
+							<view class="discount appointment-value">{{campusAppointmentDate || '请选择'}}</view>
+						</picker>
+					</view>
+					<view class='item acea-row row-between-wrapper' v-if="shippingType==2">
+						<view>配送时段</view>
+						<view class="discount appointment-value">{{campusAppointmentSlotText}}</view>
 					</view>
 					<!-- <view class='item acea-row row-between-wrapper' wx:else>
 					  <view>自提门店</view>
@@ -147,7 +165,16 @@
 						<view class='money'>-￥{{orderInfoVo.deductionPrice}}</view>
 					</view>
 					<view class='item acea-row row-between-wrapper' v-if="orderInfoVo.freightFee > 0">
-						<view>运费：</view>
+						<view>{{shippingType == 2 ? '楼层配送费：' : '运费：'}}</view>
+						<view class='money' v-if="shippingType == 2">+￥{{orderInfoVo.campusFloorDeliveryFee || 0}}</view>
+						<view class='money' v-else>+￥{{orderInfoVo.freightFee}}</view>
+					</view>
+					<view class='item acea-row row-between-wrapper' v-if="shippingType == 2 && orderInfoVo.campusRainFee > 0">
+						<view>雨天附加费：</view>
+						<view class='money'>+￥{{orderInfoVo.campusRainFee}}</view>
+					</view>
+					<view class='item acea-row row-between-wrapper' v-if="shippingType == 2 && orderInfoVo.freightFee > 0">
+						<view>配送费合计：</view>
 						<view class='money'>+￥{{orderInfoVo.freightFee}}</view>
 					</view>
 				</view>
@@ -267,6 +294,10 @@
 				addressId: 0, //地址id
 				campusAddressInfo: {},
 				campusAddressId: 0,
+				cutleryCount: 0,
+				campusAppointmentDate: '',
+				campusAppointmentDateStart: '',
+				campusAppointmentSlot: '',
 				couponId: 0, //优惠券id
 				cartId: '', //购物车id
 				userInfo: {}, //用户信息
@@ -321,6 +352,10 @@
 				if (this.mark) {
 					return this.mark.length
 				}
+			},
+			campusAppointmentSlotText() {
+				if (!this.campusAppointmentSlot) return '未配置配送时段';
+				return this.campusAppointmentSlot.replace(',', ' - ');
 			}
 		},
 		watch: {
@@ -350,6 +385,7 @@
 			// 	url: 1
 			// });
 			this.preOrderNo = options.preOrderNo || 0;
+			this.initCampusAppointmentDate();
 			this.addressChangeId = options.addressId || 0;
 			this.campusAddressChangeId = options.campusAddressId || 0;
 			if (this.campusAddressChangeId) this.shippingType = 2;
@@ -385,6 +421,10 @@
 				loadPreOrderApi(this.preOrderNo).then(res => {
 					let orderInfoVo = res.data.orderInfoVo;
 					this.orderInfoVo = orderInfoVo;
+					this.campusAppointmentSlot = orderInfoVo.campusStoreDayTime || '';
+					if (orderInfoVo.campusStoreId && !this.addressChangeId && !this.campusAddressChangeId) {
+						this.shippingType = 2;
+					}
 					if (orderInfoVo.addressId && this.addressChangeId === 0) {
 						this.addressId = orderInfoVo.addressId;
 					} else {
@@ -459,6 +499,8 @@
 					this.orderInfoVo.userIntegral = data.surplusIntegral;
 					this.orderInfoVo.deductionPrice = data.deductionPrice;
 					this.orderInfoVo.freightFee = data.freightFee;
+					this.orderInfoVo.campusFloorDeliveryFee = data.campusFloorDeliveryFee;
+					this.orderInfoVo.campusRainFee = data.campusRainFee;
 					this.orderInfoVo.payFee = data.payFee;
 					this.orderInfoVo.proTotalFee = data.proTotalFee;
 					this.orderInfoVo.useIntegral = data.useIntegral;
@@ -534,6 +576,21 @@
 			},
 			bindHideKeyboard: function(e) {
 				this.mark = e.detail.value;
+			},
+			changeCutlery: function(step) {
+				let nextCount = this.cutleryCount + step;
+				if (nextCount < 0 || nextCount > 20) return;
+				this.cutleryCount = nextCount;
+			},
+			initCampusAppointmentDate: function() {
+				let today = new Date();
+				let month = String(today.getMonth() + 1).padStart(2, '0');
+				let day = String(today.getDate()).padStart(2, '0');
+				this.campusAppointmentDateStart = today.getFullYear() + '-' + month + '-' + day;
+				this.campusAppointmentDate = this.campusAppointmentDateStart;
+			},
+			changeCampusAppointmentDate: function(e) {
+				this.campusAppointmentDate = e.detail.value;
 			},
 			/**
 			 * 获取当前金额可用优惠券
@@ -660,6 +717,12 @@
 				if (that.shippingType == 2 && !that.campusAddressId) return that.$util.Tips({
 					title: '请选择校园地址'
 				});
+				if (that.shippingType == 2 && !that.campusAppointmentDate) return that.$util.Tips({
+					title: '请选择预约日期'
+				});
+				if (that.shippingType == 2 && !that.campusAppointmentSlot) return that.$util.Tips({
+					title: '当前商家未配置配送时段'
+				});
 				if (that.shippingType == 1) {
 					if (that.contacts == "" || that.contactsTel == "") {
 						return that.$util.Tips({
@@ -685,6 +748,9 @@
 					phone: that.contactsTel,
 					addressId: that.addressId,
 					campusAddressId: that.campusAddressId,
+					cutleryCount: that.shippingType == 2 ? that.cutleryCount : 0,
+					campusAppointmentDate: that.shippingType == 2 ? that.campusAppointmentDate : '',
+					campusAppointmentSlot: that.shippingType == 2 ? that.campusAppointmentSlot : '',
 					couponId: that.couponId,
 					useIntegral: that.useIntegral,
 					preOrderNo: that.preOrderNo,
@@ -716,6 +782,36 @@
 
 	.line2 {
 		width: 504rpx;
+	}
+
+	.cutlery-stepper {
+		height: 52rpx;
+	}
+
+	.cutlery-button {
+		width: 48rpx;
+		height: 48rpx;
+		line-height: 48rpx;
+		border-radius: 6rpx;
+		background: #f3f3f3;
+		color: #282828;
+		font-size: 32rpx;
+		text-align: center;
+	}
+
+	.cutlery-button.disabled {
+		color: #bbb;
+	}
+
+	.cutlery-count {
+		min-width: 136rpx;
+		color: #666;
+		font-size: 24rpx;
+		text-align: center;
+	}
+
+	.appointment-value {
+		color: #666;
 	}
 
 	.textR {

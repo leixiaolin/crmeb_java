@@ -9,9 +9,11 @@ import lombok.experimental.Accessors;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.Max;
+import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
 
 /**
  * 添加购物车参数Request对象
@@ -51,4 +53,8 @@ public class OrderRefundApplyRequest {
     @ApiModelProperty(value = "待退款订单")
     @NotNull(message = "待退款订单 不能为空")
     private String  uni;
+
+    @ApiModelProperty(value = "申请退款金额")
+    @DecimalMin(value = "0.01", message = "申请退款金额必须大于0")
+    private BigDecimal amount;
 }

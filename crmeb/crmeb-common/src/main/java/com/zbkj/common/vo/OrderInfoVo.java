@@ -96,6 +96,12 @@ public class OrderInfoVo {
     @ApiModelProperty(value = "购物车编号列表")
     private List<Long> cartIdList;
 
+    @ApiModelProperty(value = "Campus store id")
+    private Integer campusStoreId;
+
+    @ApiModelProperty(value = "Campus store fixed business time slot")
+    private String campusStoreDayTime;
+
     @ApiModelProperty(value = "是否视频号订单")
     private Boolean isVideo = false;
 }

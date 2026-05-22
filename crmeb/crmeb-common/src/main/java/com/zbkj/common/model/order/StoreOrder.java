@@ -117,6 +117,9 @@ public class StoreOrder implements Serializable {
     @ApiModelProperty(value = "退款金额")
     private BigDecimal refundPrice;
 
+    @ApiModelProperty(value = "申请退款金额")
+    private BigDecimal refundApplyPrice;
+
     @ApiModelProperty(value = "快递名称/送货人姓名")
     private String deliveryName;
 
@@ -137,6 +140,33 @@ public class StoreOrder implements Serializable {
 
     @ApiModelProperty(value = "备注")
     private String mark;
+
+    @ApiModelProperty(value = "Campus order cutlery count")
+    private Integer cutleryCount;
+
+    @ApiModelProperty(value = "Campus order appointment date")
+    private String campusAppointmentDate;
+
+    @ApiModelProperty(value = "Campus order appointment delivery time slot")
+    private String campusAppointmentSlot;
+
+    @ApiModelProperty(value = "Campus order status: 0=unpaid, 10=pending accept, 20=delivering, -10=canceled")
+    private Integer campusStatus;
+
+    @ApiModelProperty(value = "Campus order school snapshot")
+    private String campusSchoolName;
+
+    @ApiModelProperty(value = "Campus order campus snapshot")
+    private String campusName;
+
+    @ApiModelProperty(value = "Campus order building snapshot")
+    private String campusBuildingName;
+
+    @ApiModelProperty(value = "Campus order floor snapshot")
+    private Integer campusFloorNo;
+
+    @ApiModelProperty(value = "Campus order room snapshot")
+    private String campusRoomNo;
 
     @ApiModelProperty(value = "是否删除")
     private Boolean isDel;

@@ -14,6 +14,29 @@
 				<cateNav v-if="showCateNav" :dataConfig="cateNavData" @changeTab="changeTab"></cateNav>
 				<view class="page_content skeleton">
 					<view v-if="navIndex === 0">
+						<view class="campus-home">
+							<view class="campus-address acea-row row-between-wrapper" @click="openCampusAddress">
+								<view class="campus-address-main">
+									<view class="campus-kicker">校园外卖</view>
+									<view class="campus-address-title line1">{{campusAddressTitle}}</view>
+								</view>
+								<view class="campus-address-link">切换地址</view>
+							</view>
+							<view class="campus-search" @click="openCampusStores">
+								<text class="iconfont icon-sousuo"></text>
+								<text>搜索校园商家或商品</text>
+							</view>
+							<view class="campus-actions">
+								<view class="campus-action" @click="openCampusStores">
+									<view class="campus-action-title">去点餐</view>
+									<view class="campus-action-copy">浏览可配送商家</view>
+								</view>
+								<view class="campus-action" @click="openCampusAddress">
+									<view class="campus-action-title">校园地址</view>
+									<view class="campus-action-copy">学校楼栋宿舍</view>
+								</view>
+							</view>
+						</view>
 						<view v-for="(item, index) in styleConfig" :key="index">
 							<!-- 新闻简报 -->
 							<news v-if="item.name == 'news'&&!item.isHide" :dataConfig="item"></news>
@@ -176,12 +199,24 @@
 	import {
 		goProductDetail
 	} from "../../libs/order";
+	import {
+		campusAddressDefaultApi
+	} from '@/api/campus.js';
 
 	const arrTemp = ["beforePay", "afterPay", "createBargain", "pink"];
 	var statusBarHeight = uni.getSystemInfoSync().statusBarHeight + 'px';
 	let app = getApp();
 	export default {
-		computed: mapGetters(['isLogin', 'uid', 'bottomNavigationIsCustom']),
+		computed: {
+			...mapGetters(['isLogin', 'uid', 'bottomNavigationIsCustom']),
+			campusAddressTitle() {
+				let address = this.campusDefaultAddress;
+				if (!address) return this.isLogin ? '选择学校、楼栋和宿舍' : '登录后维护校园地址';
+				return [address.schoolName, address.campusName, address.buildingName, address.roomNo]
+					.filter(item => item)
+					.join(' ');
+			}
+		},
 		components: {
 			tuiSkeleton,
 			aTip,
@@ -266,6 +301,7 @@
 					colorPicker:'#f5f5f5',
 					isBgColor:1,
 				},
+				campusDefaultAddress: null,
 			}
 		},
 		//下拉刷新
@@ -327,6 +363,7 @@
 			// #endif
 			//分销关系绑定，分享需要开启分销员开关，才能绑定成功
 			this.getTokenIsExist();
+			this.loadCampusDefaultAddress();
 		},
 		// 滚动监听
 		onPageScroll(e) {
@@ -342,6 +379,29 @@
 			}
 		},
 		methods: {
+			loadCampusDefaultAddress() {
+				if (!this.isLogin) {
+					this.campusDefaultAddress = null;
+					return;
+				}
+				campusAddressDefaultApi().then(res => {
+					this.campusDefaultAddress = res.data || null;
+				}).catch(() => {
+					this.campusDefaultAddress = null;
+				});
+			},
+			openCampusAddress() {
+				uni.navigateTo({
+					url: '/pages/users/campus_address_list/index'
+				});
+			},
+			openCampusStores() {
+				let schoolId = this.campusDefaultAddress ? this.campusDefaultAddress.schoolId : 0;
+				let query = schoolId ? '?schoolId=' + schoolId : '';
+				uni.navigateTo({
+					url: '/pages/users/campus_store_list/index' + query
+				});
+			},
 			//校验token是否有效,true为有效，false为无效
 			getTokenIsExist() {
 				this.$LoginAuth.getTokenIsExist().then(data => {
@@ -919,6 +979,84 @@
 	.menu-txt {
 		font-size: 24rpx;
 		color: #454545;
+	}
+
+	.campus-home {
+		margin: 20rpx 24rpx;
+		padding: 24rpx;
+		border-radius: 14rpx;
+		background: #fff;
+		box-shadow: 0 8rpx 30rpx rgba(37, 44, 58, 0.06);
+	}
+
+	.campus-address-main {
+		min-width: 0;
+		padding-right: 18rpx;
+	}
+
+	.campus-kicker {
+		margin-bottom: 8rpx;
+		font-size: 24rpx;
+		color: #e93323;
+	}
+
+	.campus-address-title {
+		font-size: 32rpx;
+		font-weight: 600;
+		color: #282828;
+	}
+
+	.campus-address-link {
+		flex: 0 0 auto;
+		font-size: 24rpx;
+		color: #666;
+	}
+
+	.campus-search {
+		display: flex;
+		align-items: center;
+		height: 72rpx;
+		margin-top: 22rpx;
+		padding: 0 24rpx;
+		border-radius: 10rpx;
+		background: #f5f6f8;
+		color: #999;
+		font-size: 26rpx;
+	}
+
+	.campus-search .iconfont {
+		margin-right: 12rpx;
+		font-size: 28rpx;
+	}
+
+	.campus-actions {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 16rpx;
+		margin-top: 18rpx;
+	}
+
+	.campus-action {
+		min-height: 116rpx;
+		padding: 22rpx;
+		border-radius: 10rpx;
+		background: #fff6f2;
+	}
+
+	.campus-action:last-child {
+		background: #eff7ff;
+	}
+
+	.campus-action-title {
+		font-size: 28rpx;
+		font-weight: 600;
+		color: #282828;
+	}
+
+	.campus-action-copy {
+		margin-top: 8rpx;
+		font-size: 23rpx;
+		color: #888;
 	}
 
 	.footerBottom-h10 {

@@ -10,6 +10,7 @@ import org.hibernate.validator.constraints.Range;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 
 /**
@@ -36,6 +37,7 @@ public class StoreOrderRefundRequest {
     private String orderNo;
 
     @ApiModelProperty(value = "退款金额")
+    @NotNull(message = "退款金额不能为空")
     @DecimalMin(value = "0.00", message = "退款金额不能少于0.00")
     private BigDecimal amount;
 

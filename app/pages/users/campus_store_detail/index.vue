@@ -4,12 +4,31 @@
 			<image class="store-logo" :src="store.image" mode="aspectFill"></image>
 			<view class="store-main">
 				<view class="store-name">{{store.name}}</view>
+				<view class="store-rating">{{replyCount ? replyScore + '分' : '暂无评分'}}<text>{{replyCount || 0}}条评价</text></view>
 				<view class="store-line" v-if="store.dayTime">营业时间 {{store.dayTime}}</view>
 				<view class="store-line line2">{{store.address}} {{store.detailedAddress}}</view>
 			</view>
 			<view class="phone" v-if="store.phone" @click="callStore">联系</view>
 		</view>
+		<view class="store-notice borRadius14" v-if="store && store.notice">
+			<text>公告</text>{{store.notice}}
+		</view>
 		<view class="store-note borRadius14" v-if="store && store.introduction">{{store.introduction}}</view>
+		<view class="store-closed borRadius14" v-if="store && openNow === false">商家休息中，当前可浏览商品，暂不可提交校园配送订单。</view>
+		<view class="reply-section" v-if="replyLoaded">
+			<view class="product-title">商家评价</view>
+			<view class="reply-item borRadius14" v-for="item in replyList" :key="item.id">
+				<view class="reply-head">
+					<text>{{item.nickname || '匿名用户'}}</text>
+					<text>{{item.createTime}}</text>
+				</view>
+				<view class="reply-score">商家商品 {{item.productScore || 0}} 分 · 配送服务 {{item.serviceScore || 0}} 分</view>
+				<view class="reply-comment">{{item.comment}}</view>
+				<view class="reply-product" v-if="item.storeProduct">{{item.storeProduct.storeName}}</view>
+				<view class="reply-merchant" v-if="item.isReply">商家回复：{{item.merchantReplyContent}}</view>
+			</view>
+			<view class="empty reply-empty" v-if="!replyList.length">暂无评价</view>
+		</view>
 		<view class="product-title">商品</view>
 		<scroll-view class="category-tabs" scroll-x v-if="categoryList.length">
 			<view class="category-track">
@@ -31,7 +50,8 @@
 
 <script>
 	import {
-		campusStoreListApi
+		campusStoreListApi,
+		campusStoreReplyListApi
 	} from '@/api/campus.js';
 	import {
 		getProductslist,
@@ -50,6 +70,11 @@
 				schoolId: 0,
 				storeId: 0,
 				store: null,
+				openNow: null,
+				replyScore: 0,
+				replyCount: 0,
+				replyList: [],
+				replyLoaded: false,
 				categoryList: [],
 				cid: '',
 				productList: [],
@@ -66,6 +91,7 @@
 			this.schoolId = Number(options.schoolId || 0);
 			this.storeId = Number(options.storeId || 0);
 			this.loadStore();
+			this.loadReplies();
 			this.loadCategories();
 			this.getProducts();
 		},
@@ -77,6 +103,9 @@
 				campusStoreListApi({ schoolId: this.schoolId }).then(res => {
 					let range = (res.data || []).find(item => item.storeId === this.storeId);
 					this.store = range ? range.systemStore : null;
+					this.openNow = range ? range.openNow : null;
+					this.replyScore = range ? range.replyScore : 0;
+					this.replyCount = range ? range.replyCount : 0;
 					if (this.store) {
 						uni.setNavigationBarTitle({ title: this.store.name });
 					}
@@ -89,6 +118,21 @@
 				getStoreCategoryList(this.storeId).then(res => {
 					this.categoryList = res.data || [];
 				}).catch(err => {
+					this.$util.Tips({ title: err });
+				});
+			},
+			loadReplies() {
+				if (!this.schoolId || !this.storeId) return;
+				campusStoreReplyListApi({
+					schoolId: this.schoolId,
+					storeId: this.storeId,
+					page: 1,
+					limit: 3
+				}).then(res => {
+					this.replyList = res.data.list || [];
+					this.replyLoaded = true;
+				}).catch(err => {
+					this.replyLoaded = true;
 					this.$util.Tips({ title: err });
 				});
 			},
@@ -186,6 +230,91 @@
 		background: #fff;
 		padding: 22rpx 24rpx;
 		margin-top: 20rpx;
+	}
+
+	.store-notice {
+		color: #555;
+		background: #fff7e8;
+		font-size: 24rpx;
+		line-height: 36rpx;
+		padding: 22rpx 24rpx;
+		margin-top: 20rpx;
+	}
+
+	.store-notice text {
+		color: #b65c15;
+		font-weight: 600;
+		margin-right: 12rpx;
+	}
+
+	.store-rating {
+		color: #b65c15;
+		font-size: 24rpx;
+		line-height: 34rpx;
+		margin-bottom: 8rpx;
+	}
+
+	.store-rating text {
+		color: #777;
+		margin-left: 12rpx;
+	}
+
+	.store-closed {
+		color: #8c4a13;
+		background: #fff2df;
+		font-size: 24rpx;
+		line-height: 36rpx;
+		padding: 22rpx 24rpx;
+		margin-top: 20rpx;
+	}
+
+	.reply-item {
+		background: #fff;
+		margin-bottom: 16rpx;
+		padding: 22rpx 24rpx;
+	}
+
+	.reply-head {
+		display: flex;
+		justify-content: space-between;
+		color: #888;
+		font-size: 22rpx;
+		line-height: 32rpx;
+	}
+
+	.reply-score {
+		color: #b65c15;
+		font-size: 23rpx;
+		line-height: 34rpx;
+		margin-top: 10rpx;
+	}
+
+	.reply-comment {
+		color: #333;
+		font-size: 25rpx;
+		line-height: 38rpx;
+		margin-top: 10rpx;
+		word-break: break-all;
+	}
+
+	.reply-product,
+	.reply-merchant {
+		color: #777;
+		font-size: 23rpx;
+		line-height: 34rpx;
+		margin-top: 10rpx;
+	}
+
+	.reply-merchant {
+		background: #f7f7f7;
+		border-radius: 6rpx;
+		padding: 12rpx 14rpx;
+	}
+
+	.reply-empty {
+		background: #fff;
+		border-radius: 8rpx;
+		padding-top: 36rpx;
 	}
 
 	.product-title {

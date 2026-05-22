@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Data
@@ -30,4 +31,16 @@ public class CampusStoreRangeResponse implements Serializable {
 
     @ApiModelProperty(value = "Campus store detail")
     private SystemStore systemStore;
+
+    @ApiModelProperty(value = "Campus store is inside business time")
+    private Boolean openNow;
+
+    @ApiModelProperty(value = "Campus store rating aggregated from product replies")
+    private BigDecimal replyScore;
+
+    @ApiModelProperty(value = "Campus store reply count")
+    private Integer replyCount;
+
+    @ApiModelProperty(value = "Campus school delivery start price")
+    private BigDecimal startPrice;
 }

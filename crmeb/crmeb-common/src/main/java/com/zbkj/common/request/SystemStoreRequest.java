@@ -40,6 +40,10 @@ public class SystemStoreRequest implements Serializable {
     @ApiModelProperty(value = "简介")
     private String introduction;
 
+    @ApiModelProperty(value = "Store announcement")
+    @Length(max = 500, message = "Store announcement cannot exceed 500 characters")
+    private String notice;
+
     @ApiModelProperty(value = "手机号码")
     @Pattern(regexp = RegularConstants.PHONE_TWO, message = "手机号码格式错误")
     private String phone;
